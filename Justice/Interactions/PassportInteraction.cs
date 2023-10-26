@@ -117,7 +117,7 @@ namespace DiscordApp.Justice.Interactions
             Random random = new();
             User spUser = await User.CreateUser(name);
 
-            DateTimeOffset toTime = DateTime.Now.AddDays(31);
+            DateTimeOffset toTime = DateTime.Now.AddDays(60);
             DateTime birthDate;
             int id = random.Next(00001, 99999);
             long unixTime = toTime.ToUnixTimeSeconds();
