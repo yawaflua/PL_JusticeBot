@@ -9,7 +9,6 @@ namespace DiscordApp.Database
 
         public DbSet<Passport> Passport { get; set; }
         public DbSet<Autobranches> Autobranches { get; set; }
-        public DbSet<Autoreactions> Autoreactions { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

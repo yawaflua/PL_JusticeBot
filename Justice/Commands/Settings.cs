@@ -15,30 +15,17 @@ namespace DiscordApp.Discord.Commands
         [DefaultMemberPermissions(GuildPermission.Administrator)]
         public async Task addAutoBranches(IChannel channel, string branchName = "Обсуждение")
         {
-
-            await RespondAsync($"Автоветки для канала {channel.Name} настроены", ephemeral: true);
+            //await DeferAsync(true);
             Autobranches autobranches = new()
             {
                 ChannelId = channel.Id,
                 BranchName = branchName
             };
             Startup.appDbContext.Autobranches.Add(autobranches);
+            await Startup.appDbContext.SaveChangesAsync();
+            await FollowupAsync($"Автоветки для канала <#{channel.Id}> настроены", ephemeral: true);
         }
 
-        [SlashCommand("emotes", "Настройка автоэмоций")]
-        [DefaultMemberPermissions(GuildPermission.Administrator)]
-        public async Task addAutoReact(string emote, IChannel channel)
-        {
-            var emotes = Emote.Parse(emote);
-            await RespondAsync($"Автореакция {emotes.Url} для канала {channel.Name} настроены", ephemeral: true);
-
-            Autoreactions autoreactions = new()
-            {
-                ChannelId = channel.Id,
-                EmoteId = emotes.ToString()
-            };
-            Startup.appDbContext.Autoreactions.Add(autoreactions);
-        }
 
         [SlashCommand("embed", "Отправить эмбед")]
         [DefaultMemberPermissions(GuildPermission.Administrator)]

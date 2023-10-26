@@ -36,22 +36,15 @@ namespace DiscordApp.Justice.Events
 
         public static async Task onMessageCreate(SocketMessage message) 
         {
-            /**
+            if (message.Type != MessageType.Default) { return; }
+
             var autoBranchesDatabase = await Startup.appDbContext.Autobranches.FindAsync(message.Channel.Id);
-            var autoReactDatabase = await Startup.appDbContext.Autoreactions.ForEachAsync(s => s.ChannelId == message.Channel.Id);
             if (autoBranchesDatabase != null) 
             {
-                await ((ITextChannel)message.Channel).CreateThreadAsync(autoBranchesDatabase.BranchName);
+                await ((ITextChannel)message.Channel).CreateThreadAsync(autoBranchesDatabase.BranchName, ThreadType.PublicThread, message: message);
             }
-            if (autoReactDatabase != false)
-            {
-                foreach (Autoreactions autoreaction in autoReactDatabase)
-                {
-                    var Emoji = Emote.Parse(autoreaction.EmoteId);
-                    await message.AddReactionAsync(Emoji);
-                }
-            }
-            **/
+
+            
         }
     }
 }

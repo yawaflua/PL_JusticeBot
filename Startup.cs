@@ -7,6 +7,7 @@ using DiscordApp.Auth;
 using DiscordApp.Database;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
 using spworlds;
 using System;
 
@@ -51,7 +52,7 @@ namespace DiscordApp
                 .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()))
                 .AddSingleton<JusticeHandler>()
                 .AddSingleton(sp)
-                .AddDbContext<AppDbContext>(c => c.UseNpgsql(@"Host=185.104.112.180;Username=yaflay;Password=hQgtruasSS;Database=spw_store"))
+                .AddDbContext<AppDbContext>(c => c.UseNpgsql(@"Host=185.104.112.180;Username=yaflay;Password=hQgtruasSS;Database=poopland"))
                 .AddAuthentication(options =>
                 {
                     options.DefaultAuthenticateScheme = "Bearer";
