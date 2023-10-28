@@ -1,21 +1,17 @@
 ﻿using Discord;
 using Discord.Interactions;
-using Discord.Rest;
 using Discord.WebSocket;
 using DiscordApp.Database.Tables;
 using DiscordApp.Enums;
-using Microsoft.EntityFrameworkCore;
 using spworlds.Types;
-using System.Globalization;
-using System.IO;
-using System.Reflection;
-using System.Xml;
-using System.Xml.Linq;
 
 namespace DiscordApp.Justice.Interactions
 {
     public class PassportInteraction : InteractionModuleBase<SocketInteractionContext>
     {
+
+        protected private int _AddDays = 60;
+
 
         [ComponentInteraction("newPassport")]
         public async Task AplyWork()
@@ -45,9 +41,18 @@ namespace DiscordApp.Justice.Interactions
                 SocketGuildUser user = Context.Guild.GetUser(Context.User.Id);
                 Random random = new();
                 User spUser = await User.CreateUser(passport.Applicant);
+                DateTimeOffset toTime;
+                if (DateTimeOffset.FromUnixTimeSeconds(passport.birthDate).AddDays(14) < DateTimeOffset.Now)
+                {
+                    toTime = DateTime.Now.AddDays(_AddDays);
+                }
+                else
+                {
+                    toTime = DateTime.Now.AddDays(14);
+                }
 
-                DateTimeOffset toTime = DateTime.Now.AddDays(31);
                 int id = random.Next(00001, 99999);
+                while (id.ToString().Length < 5) { id = random.Next(00001, 99999); }
                 long unixTime = toTime.ToUnixTimeSeconds();
                 long nowUnixTime = DateTimeOffset.Now.ToUnixTimeSeconds();
 
@@ -87,6 +92,7 @@ namespace DiscordApp.Justice.Interactions
                     {
                         id = random.Next(00001, 99999);
                         passport.Id = id;
+                        while (id.ToString().Length < 5) { id = random.Next(00001, 99999); }
                         Console.WriteLine(passport.Id);
                         if (Startup.appDbContext.Passport.FindAsync(passport.Id).Result == null) { break; }
                     }
@@ -117,11 +123,11 @@ namespace DiscordApp.Justice.Interactions
             Random random = new();
             User spUser = await User.CreateUser(name);
 
-            DateTimeOffset toTime = DateTime.Now.AddDays(60);
+            DateTimeOffset toTime = DateTime.Now.AddDays(_AddDays);
             DateTime birthDate;
             int id = random.Next(00001, 99999);
+            while (id.ToString().Length < 5) { id = random.Next(00001, 99999); }
             long unixTime = toTime.ToUnixTimeSeconds();
-            long toUnixTime = DateTimeOffset.Now.ToUnixTimeSeconds();
 
             try
             {
@@ -129,7 +135,7 @@ namespace DiscordApp.Justice.Interactions
             }
             catch
             {
-                await FollowupAsync($"Возможно, с датой {modal.Birthday} какая-то ошибка, попробуйте такой тип: 14.02.2023", ephemeral: true);
+                await FollowupAsync($"Возможно, с датой `{modal.Birthday}` какая-то ошибка, попробуйте такой тип: 14.02.2023", ephemeral: true);
                 return;
             }
 
@@ -171,6 +177,7 @@ namespace DiscordApp.Justice.Interactions
                 while (!isUnical)
                 {
                     id = random.Next(00001, 99999);
+                    while (id.ToString().Length < 5) { id = random.Next(00001, 99999); }
                     passport.Id = id;
                     Console.WriteLine(passport.Id);
                     if (Startup.appDbContext.Passport.FindAsync(passport.Id).Result == null) { break; }
@@ -238,7 +245,7 @@ namespace DiscordApp.Justice.Interactions
                 if (birthDate.AddDays(14) < DateTime.Now)
                 {
                     await FollowupAsync($"Возможно, игрок {name} больше не новичек, и бесплатный паспорт ему не положен! Оформляю паспорт на месяц...0", ephemeral: true);
-                    toTime = DateTimeOffset.Now.AddDays(31);
+                    toTime = DateTimeOffset.Now.AddDays(60);
                 }
             }
             catch (Exception ex)
