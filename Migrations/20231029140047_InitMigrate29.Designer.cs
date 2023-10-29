@@ -2,6 +2,7 @@
 using DiscordApp.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -10,9 +11,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DiscordApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231029140047_InitMigrate29")]
+    partial class InitMigrate29
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -76,46 +79,6 @@ namespace DiscordApp.Migrations
                     b.ToTable("Autobranches", "public");
                 });
 
-            modelBuilder.Entity("DiscordApp.Database.Tables.Bizness", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ApplicantId")
-                        .HasColumnType("integer");
-
-                    b.Property<int[]>("BiznessEmployes")
-                        .IsRequired()
-                        .HasColumnType("integer[]");
-
-                    b.Property<string>("BiznessName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("BiznessType")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("CardNumber")
-                        .HasColumnType("integer");
-
-                    b.Property<long>("Date")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("Employee")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ApplicantId");
-
-                    b.ToTable("Bizness");
-                });
-
             modelBuilder.Entity("DiscordApp.Database.Tables.BooksPatents", b =>
                 {
                     b.Property<int>("Id")
@@ -128,8 +91,8 @@ namespace DiscordApp.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<long>("Date")
-                        .HasColumnType("bigint");
+                    b.Property<int>("Date")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Employee")
                         .IsRequired()
@@ -202,17 +165,6 @@ namespace DiscordApp.Migrations
                         .IsRequired();
 
                     b.Navigation("passport");
-                });
-
-            modelBuilder.Entity("DiscordApp.Database.Tables.Bizness", b =>
-                {
-                    b.HasOne("DiscordApp.Database.Tables.Passport", "Applicant")
-                        .WithMany()
-                        .HasForeignKey("ApplicantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Applicant");
                 });
 
             modelBuilder.Entity("DiscordApp.Database.Tables.BooksPatents", b =>

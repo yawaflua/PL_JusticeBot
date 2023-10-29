@@ -15,7 +15,7 @@ namespace DiscordApp.Justice.Interactions
                 {
                     await FollowupAsync("Готово!", ephemeral: true);
                     var guildUser = Context.Guild.GetUser(Context.User.Id);
-                    await guildUser.AddRoleAsync(1165687128366268511);
+                    await guildUser.AddRoleAsync(1136564585420304444);
                     await guildUser.ModifyAsync(func =>
                     {
                         func.Nickname = user.Name;

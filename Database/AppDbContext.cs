@@ -1,4 +1,5 @@
 using DiscordApp.Database.Tables;
+using Microsoft.AspNetCore.DataProtection.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace DiscordApp.Database
@@ -9,6 +10,10 @@ namespace DiscordApp.Database
 
         public DbSet<Passport> Passport { get; set; }
         public DbSet<Autobranches> Autobranches { get; set; }
+        public DbSet<ArtsPatents> ArtPatents { get; set; }
+        public DbSet<BooksPatents> BookPatents { get; set; }
+        public DbSet<Bizness> Bizness { get; set; }
+        public DbSet<Reports> Reports { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

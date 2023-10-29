@@ -4,7 +4,7 @@ using Discord.WebSocket;
 using DiscordApp.Database.Tables;
 using DiscordApp.Enums;
 using spworlds.Types;
-
+using DiscordApp.Justice.Modals;
 namespace DiscordApp.Justice.Interactions
 {
     public class PassportInteraction : InteractionModuleBase<SocketInteractionContext>
@@ -15,16 +15,16 @@ namespace DiscordApp.Justice.Interactions
 
         [ComponentInteraction("newPassport")]
         public async Task AplyWork()
-            => await Context.Interaction.RespondWithModalAsync<NewPassportModal>("passportModal");
+            => await Context.Interaction.RespondWithModalAsync<INewPassportModal>("passportModal");
         [ComponentInteraction("reworkPassport")]
         public async Task reCreatePassport()
-            => await Context.Interaction.RespondWithModalAsync<ReWorkPassportModal>("reworkpassportModal");
+            => await Context.Interaction.RespondWithModalAsync<IReWorkPassportModal>("reworkpassportModal");
         [ComponentInteraction("reNewPassportButton")]
-        public async Task reNewPassportModal() => await Context.Interaction.RespondWithModalAsync<NewPassportModal>("ReNewPassportModal");
+        public async Task reNewPassportModal() => await Context.Interaction.RespondWithModalAsync<INewPassportModal>("ReNewPassportModal");
 
 
         [ModalInteraction("reworkpassportModal")]
-        public async Task reCreatePassportInteraction(ReWorkPassportModal modal)
+        public async Task reCreatePassportInteraction(IReWorkPassportModal modal)
         {
             await DeferAsync(true);
             double passportId = modal.Id;
@@ -109,7 +109,7 @@ namespace DiscordApp.Justice.Interactions
             }
         }
         [ModalInteraction("ReNewPassportModal")]
-        public async Task renewPassportInteraction(NewPassportModal modal)
+        public async Task renewPassportInteraction(INewPassportModal modal)
         {
             await DeferAsync(true);
             string name = modal.NickName;
@@ -170,6 +170,12 @@ namespace DiscordApp.Justice.Interactions
                 Id = id,
                 Support = supporter
             };
+            Reports report = new()
+            {
+                Employee = ((IGuildUser)Context.User).DisplayName,
+                type = Types.ReportTypes.editPassport
+            };
+            await Startup.appDbContext.Reports.AddAsync(report);
 
             if (Startup.appDbContext.Passport.FindAsync(passport.Id).Result != null)
             {
@@ -219,7 +225,7 @@ namespace DiscordApp.Justice.Interactions
 
         }
         [ModalInteraction("passportModal")]
-        public async Task createPassportInteraction(NewPassportModal modal)
+        public async Task createPassportInteraction(INewPassportModal modal)
         {
             await DeferAsync(true);
             string name = modal.NickName;
@@ -233,7 +239,7 @@ namespace DiscordApp.Justice.Interactions
             Random random = new();
             User spUser = await User.CreateUser(name);
 
-            DateTimeOffset toTime = DateTime.Now.AddDays(14);
+            DateTimeOffset toTime;
             DateTime birthDate;
             int id = random.Next(00001, 99999);
             long unixTime;
@@ -244,8 +250,12 @@ namespace DiscordApp.Justice.Interactions
                 unixTime = ((DateTimeOffset)birthDate).ToUnixTimeSeconds();
                 if (birthDate.AddDays(14) < DateTime.Now)
                 {
-                    await FollowupAsync($"Возможно, игрок {name} больше не новичек, и бесплатный паспорт ему не положен! Оформляю паспорт на месяц...0", ephemeral: true);
-                    toTime = DateTimeOffset.Now.AddDays(60);
+                    await FollowupAsync($"Возможно, игрок {name} больше не новичек, и бесплатный паспорт ему не положен! Оформляю паспорт на месяц...", ephemeral: true);
+                    toTime = DateTimeOffset.Now.AddMonths(2);
+                }
+                else
+                {
+                    toTime = DateTime.Now.AddDays(14);
                 }
             }
             catch (Exception ex)
@@ -324,54 +334,20 @@ namespace DiscordApp.Justice.Interactions
                 .WithTimestamp(toTime)
                 .Build();
 
-
+            Reports report = new()
+            {
+                Employee = ((IGuildUser)Context.User).DisplayName,
+                type = Types.ReportTypes.NewPassport
+            };
+            await Startup.appDbContext.Reports.AddAsync(report);
             await Startup.appDbContext.Passport.AddAsync(passport);
             await Startup.appDbContext.SaveChangesAsync();
             await FollowupAsync($"ID для паспорта: {id}", embed: embed, ephemeral: true);
 
             var channel = Context.Guild.GetChannel(1108006685626355733) as ITextChannel;
 
-            var message = await channel.SendMessageAsync(embed: embed);
+            await channel.SendMessageAsync(embed: embed);
         }
     }
-
-    public class NewPassportModal : IModal
-    {
-        public string Title => "Создание паспорта";
-
-        [InputLabel("Ник игрока")]
-        [ModalTextInput("nickname", TextInputStyle.Short, placeholder: "YaFlay", maxLength: 90)]
-        public string NickName { get; set; }
-
-        [InputLabel("Благотворитель")]
-        [ModalTextInput("Supporter", TextInputStyle.Short, placeholder: "1", maxLength: 5)]
-        public int Supporter { get; set; }
-
-        [InputLabel("РП Имя")]
-        [ModalTextInput("rolePlayName", TextInputStyle.Short, placeholder: "Олег Бебров", maxLength: 200)]
-        public string RPName { get; set; }
-
-        [InputLabel("Пол")]
-        [ModalTextInput("gender", TextInputStyle.Short, maxLength: 200)]
-        public string Gender { get; set; }
-        [InputLabel("Дата рождения")]
-        [ModalTextInput("BirthDay", TextInputStyle.Short, placeholder: "16.02.2023", maxLength: 100)]
-        public string Birthday { get; set; }
-
-    }
-
-    public class ReWorkPassportModal : IModal
-    {
-        public string Title => "Создание паспорта";
-
-        [InputLabel("ID паспорта")]
-        [ModalTextInput("id", TextInputStyle.Short, placeholder: "82-777", maxLength: 7)]
-        public double Id { get; set; }
-
-        [InputLabel("Новые данные(0/1)")]
-        [ModalTextInput("isNewPassportData", TextInputStyle.Short, placeholder: "1 - да, 0 - нет", maxLength: 1, initValue: "0")]
-        public int IsNewPassport { get; set; }
-
-    }
-
 }
+

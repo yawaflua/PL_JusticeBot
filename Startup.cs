@@ -31,8 +31,8 @@ namespace DiscordApp
                 .AddEnvironmentVariables(prefix: "m.")
                 .AddJsonFile("appsettings.json", optional: true)
                 .Build();
-            string CardId = "9bfb91d2-8e14-4c6d-b91d-8a55ab4c6559";
-            string CardToken = "L3NsEQsW69sM3Gm0v/+hHDaU4TFocp7F";
+            string CardId = "28fd1597-05a9-4ee0-8845-16ca37135081";
+            string CardToken = "m+ziDmuTdFElD0vcKYnO3DS1h/9HuRGk";
             sp = new SPWorlds(CardId, CardToken);
         }
 

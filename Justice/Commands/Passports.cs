@@ -7,6 +7,7 @@ namespace DiscordApp.Justice.Commands
     {
         public InteractionService Commands { get; set; }
         [SlashCommand("send_passport_embed", description: "Отправляет сообщение для регистрации паспортов")]
+        [DefaultMemberPermissions(GuildPermission.Administrator)]
         public async Task sendPassportBuilerEmbed()
         {
             await DeferAsync(true);

@@ -59,7 +59,7 @@ namespace DiscordApp.Discord.Commands
             await DeferAsync(true);
             var embed = new EmbedBuilder()
                 .WithTitle("**Верификация игроков**")
-                .WithDescription($"Если что-то случилось, и вам не выдается роль <@&1165687128366268511>, то нажмите на кнопку ниже!")
+                .WithDescription($"Если что-то случилось, и вам не выдается роль <@&1136564585420304444>, то нажмите на кнопку ниже!")
                 .WithImageUrl("")
                 .WithColor(Color.Blue)
                 .Build();
@@ -74,8 +74,25 @@ namespace DiscordApp.Discord.Commands
             await Context.Channel.SendMessageAsync(embed: embed, components: components);
             await FollowupAsync("Ok", ephemeral: true);
         }
+        [SlashCommand("раздача-зарплаты", "Берет данные из баз данных и раздает кому надо")]
+        [DefaultMemberPermissions(GuildPermission.Administrator)]
+        public async Task giveAvanse()
+        {
+            await DeferAsync(true);
+            int allCount = 0;
+            var allReports = Startup.appDbContext.Reports.ToArray();
+            var allEmployee = new Dictionary<string, int>();
+            foreach (var report in allReports)
+            {
+                allEmployee[report.Employee] += (int)report.type;
 
-
-        // ReplyAsync is a method on ModuleBase 
+            }
+            foreach (var employee in allEmployee)
+            {
+                await Startup.sp.CreateTransaction(employee.Key, employee.Value, "АвтоЗарплата Юстиций");
+                allCount += employee.Value;
+            }
+            await FollowupAsync($"Готово! Раздал {allCount} АР", ephemeral: true);
+        }
     }
 }
