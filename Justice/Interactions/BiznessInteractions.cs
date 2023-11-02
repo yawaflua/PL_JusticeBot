@@ -92,6 +92,7 @@ namespace DiscordApp.Justice.Interactions
                 else 
                 {
                     await FollowupAsync($"У {passportId} указан неправильный номер паспорта.", ephemeral: true);
+                    return;
                 }
             }
 

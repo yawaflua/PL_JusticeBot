@@ -5,6 +5,8 @@ using DiscordApp.Database.Tables;
 using DiscordApp.Enums;
 using spworlds.Types;
 using DiscordApp.Justice.Modals;
+using System;
+
 namespace DiscordApp.Justice.Interactions
 {
     public class PassportInteraction : InteractionModuleBase<SocketInteractionContext>
@@ -34,7 +36,7 @@ namespace DiscordApp.Justice.Interactions
                 await FollowupAsync("Нажмите на кнопку ниже", components: new ComponentBuilder().WithButton(new ButtonBuilder("Кнопочка", "reNewPassportButton")).Build(), ephemeral: true);
             }
             else
-            {
+            { 
                 var passport = Startup.appDbContext.Passport.Where(x => x.Id == passportId).FirstOrDefault();
                 if (passport == null) { await FollowupAsync("ID паспорта не правильный, или не существует.", ephemeral: true); return; }
 
@@ -123,15 +125,25 @@ namespace DiscordApp.Justice.Interactions
             Random random = new();
             User spUser = await User.CreateUser(name);
 
-            DateTimeOffset toTime = DateTime.Now.AddDays(_AddDays);
-            DateTime birthDate;
+            DateTimeOffset toTime;
+            DateOnly birthDate;
             int id = random.Next(00001, 99999);
             while (id.ToString().Length < 5) { id = random.Next(00001, 99999); }
-            long unixTime = toTime.ToUnixTimeSeconds();
+            long unixBirthDateTime;
 
             try
             {
-                birthDate = DateTime.Parse(birthday);
+                birthDate = DateOnly.Parse(birthday);
+                unixBirthDateTime = DateTimeOffset.Parse(birthDate.ToString()).ToUnixTimeSeconds();
+                if (birthDate.AddDays(14) < DateOnly.FromDateTime(DateTime.Now))
+                {
+                    await FollowupAsync($"Возможно, игрок {name} больше не новичек, и бесплатный паспорт ему не положен! Оформляю паспорт на месяц...", ephemeral: true);
+                    toTime = DateTimeOffset.Now.AddMonths(2);
+                }
+                else
+                {
+                    toTime = DateTimeOffset.Now.AddDays(14);
+                }
             }
             catch
             {
@@ -164,15 +176,15 @@ namespace DiscordApp.Justice.Interactions
                 Employee = user.Id,
                 RpName = RpName,
                 Gender = gender,
-                Date = unixTime,
-                birthDate = ((DateTimeOffset)birthDate).ToUnixTimeSeconds(),
+                Date = toTime.ToUnixTimeSeconds(),
+                birthDate = unixBirthDateTime,
                 Applicant = name,
                 Id = id,
                 Support = supporter
             };
             Reports report = new()
             {
-                Employee = ((IGuildUser)Context.User).DisplayName,
+                Employee = Startup.sp.GetUser(Context.User.Id.ToString()).Result.Name,
                 type = Types.ReportTypes.editPassport
             };
             await Startup.appDbContext.Reports.AddAsync(report);
@@ -235,33 +247,43 @@ namespace DiscordApp.Justice.Interactions
             string gender = modal.Gender;
 
             SocketGuildUser user = Context.Guild.GetUser(Context.User.Id);
-            Supporter supporter;
             Random random = new();
-            User spUser = await User.CreateUser(name);
-
+            Supporter supporter;
+            User spUser;
             DateTimeOffset toTime;
-            DateTime birthDate;
-            int id = random.Next(00001, 99999);
-            long unixTime;
+            DateOnly birthDate;
+            long unixBirthDateTime;
 
             try
             {
-                birthDate = DateTime.Parse(birthday);
-                unixTime = ((DateTimeOffset)birthDate).ToUnixTimeSeconds();
-                if (birthDate.AddDays(14) < DateTime.Now)
+                spUser = await User.CreateUser(name);
+            }
+            catch
+            {
+                await FollowupAsync("Игрок с таким ником не найден!", ephemeral: true);
+                return;
+            }
+
+            int id = random.Next(00001, 99999);
+            while (id.ToString().Length < 5) { id = random.Next(00001, 99999); }
+
+            try
+            {
+                birthDate = DateOnly.Parse(birthday);
+                unixBirthDateTime = DateTimeOffset.Parse(birthDate.ToString()).ToUnixTimeSeconds();
+                if (birthDate.AddDays(14) < DateOnly.FromDateTime(DateTime.Now))
                 {
-                    await FollowupAsync($"Возможно, игрок {name} больше не новичек, и бесплатный паспорт ему не положен! Оформляю паспорт на месяц...", ephemeral: true);
+                    await FollowupAsync($"Возможно, игрок {name} играет больше двух недель, и бесплатный паспорт ему не положен! Оформляю паспорт на два месяца...", ephemeral: true);
                     toTime = DateTimeOffset.Now.AddMonths(2);
                 }
                 else
                 {
-                    toTime = DateTime.Now.AddDays(14);
+                    toTime = DateTimeOffset.Now.AddDays(14);
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                await FollowupAsync($"Возможно, с датой {modal.Birthday} какая-то ошибка, попробуйте такой тип: 14.02.2023", ephemeral: true);
-                Console.WriteLine($"Error in 237-243 line. Error: {ex.Message}");
+                await FollowupAsync($"Возможно, с датой `{modal.Birthday}` какая-то ошибка, попробуйте такой тип: 14.02.2023", ephemeral: true);
                 return;
             }
 
@@ -290,7 +312,8 @@ namespace DiscordApp.Justice.Interactions
                 Employee = user.Id,
                 RpName = RpName,
                 Gender = gender,
-                Date = unixTime,
+                Date = DateTimeOffset.Now.ToUnixTimeSeconds(),
+                birthDate = unixBirthDateTime,
                 Applicant = name,
                 Id = id,
                 Support = supporter
@@ -303,7 +326,7 @@ namespace DiscordApp.Justice.Interactions
                 {
                     id = random.Next(00001, 99999);
                     passport.Id = id;
-                    Console.WriteLine(passport.Id);
+                    while (id.ToString().Length < 5) { id = random.Next(00001, 99999); }
                     if (Startup.appDbContext.Passport.FindAsync(passport.Id).Result == null) { break; }
                 }
             }
@@ -314,7 +337,7 @@ namespace DiscordApp.Justice.Interactions
 Имя: {passport.Applicant}
 РП Имя: {passport.RpName}
 Айди: {id}
-Благотворитель: {passport.Support}
+Благотворитель: {(int)passport.Support }
 Гендер: {passport.Gender}
 Дата рождения: <t:{passport.birthDate}:D>")
                 .WithIsInline(true);
@@ -341,7 +364,7 @@ namespace DiscordApp.Justice.Interactions
             };
             await Startup.appDbContext.Reports.AddAsync(report);
             await Startup.appDbContext.Passport.AddAsync(passport);
-            await Startup.appDbContext.SaveChangesAsync();
+            if (!RpName.StartsWith("test")) { await Startup.appDbContext.SaveChangesAsync(); }
             await FollowupAsync($"ID для паспорта: {id}", embed: embed, ephemeral: true);
 
             var channel = Context.Guild.GetChannel(1108006685626355733) as ITextChannel;
