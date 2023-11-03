@@ -2,6 +2,7 @@
 using Discord.Interactions;
 using Discord.WebSocket;
 using DiscordApp.Database;
+using Microsoft.VisualBasic;
 using System.Reflection;
 
 
@@ -47,22 +48,16 @@ namespace DiscordApp
             try
             {
                 var context = new SocketInteractionContext(client, interaction);
-
+                //await context.Interaction.DeferAsync(true);
                 var result = await handler.ExecuteCommandAsync(context, services);
 
                 if (!result.IsSuccess)
-                    switch (result.Error)
-                    {
-                        case InteractionCommandError.UnmetPrecondition:
-                            break;
-                        default:
-                            break;
-                    }
+                    await interaction.RespondAsync($"Возникла какая-то ошибка: {result.Error}", ephemeral: true);
             }
             catch
             {
                 if (interaction.Type is InteractionType.ApplicationCommand)
-                    await interaction.GetOriginalResponseAsync().ContinueWith(async (msg) => await msg.Result.DeleteAsync());
+                    await interaction.GetOriginalResponseAsync().ContinueWith(async (msg) => await msg.Result.DeleteAsync());  ;
             }
         }
     }

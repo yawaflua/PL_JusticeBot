@@ -33,8 +33,8 @@ namespace DiscordApp.Justice.Modals
         public string Title => "Создание паспорта";
 
         [InputLabel("ID паспорта")]
-        [ModalTextInput("id", TextInputStyle.Short, placeholder: "82-777", maxLength: 7)]
-        public double Id { get; set; }
+        [ModalTextInput("id", TextInputStyle.Short, placeholder: "97166", maxLength: 7)]
+        public string Id { get; set; }
 
         [InputLabel("Новые данные(0/1)")]
         [ModalTextInput("isNewPassportData", TextInputStyle.Short, placeholder: "1 - да, 0 - нет", maxLength: 1, initValue: "0")]

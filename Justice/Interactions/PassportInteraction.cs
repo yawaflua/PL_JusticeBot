@@ -28,8 +28,9 @@ namespace DiscordApp.Justice.Interactions
         [ModalInteraction("reworkpassportModal")]
         public async Task reCreatePassportInteraction(IReWorkPassportModal modal)
         {
-            await DeferAsync(true);
-            double passportId = modal.Id;
+
+            int passportId;
+            int.TryParse(modal.Id, out passportId);
             bool recreatePassport = modal.IsNewPassport == 1;
             if (recreatePassport)
             {
@@ -37,6 +38,7 @@ namespace DiscordApp.Justice.Interactions
             }
             else
             { 
+                if (passportId == null) { await FollowupAsync("Айди паспорта устаревший, используйте кнопку \"Создать новый\" для создания паспорта", ephemeral: true); return; }
                 var passport = Startup.appDbContext.Passport.Where(x => x.Id == passportId).FirstOrDefault();
                 if (passport == null) { await FollowupAsync("ID паспорта не правильный, или не существует.", ephemeral: true); return; }
 
@@ -113,7 +115,7 @@ namespace DiscordApp.Justice.Interactions
         [ModalInteraction("ReNewPassportModal")]
         public async Task renewPassportInteraction(INewPassportModal modal)
         {
-            await DeferAsync(true);
+
             string name = modal.NickName;
             string RpName = modal.RPName;
             int supporterInt = modal.Supporter;
@@ -239,7 +241,7 @@ namespace DiscordApp.Justice.Interactions
         [ModalInteraction("passportModal")]
         public async Task createPassportInteraction(INewPassportModal modal)
         {
-            await DeferAsync(true);
+
             string name = modal.NickName;
             string RpName = modal.RPName;
             int supporterInt = modal.Supporter;

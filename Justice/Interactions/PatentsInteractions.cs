@@ -18,7 +18,7 @@ namespace DiscordApp.Justice.Interactions
         [ModalInteraction("newArtCallback")]
         public async Task newArtModalInteraction(INewArtModal modal)
         {
-            await DeferAsync(true);
+
             string name = modal.Name;
             string maps = modal.MapNumbers;
             string size = modal.Size;
@@ -89,7 +89,7 @@ namespace DiscordApp.Justice.Interactions
         [ModalInteraction("newBookCallback")]
         public async Task newBookModalInteraction(INewBookModal modal)
         {
-            await DeferAsync(true);
+
             string name = modal.Name;
             string janre = modal.Janre;
             string annotation = modal.Annotation;

@@ -10,15 +10,15 @@ namespace DiscordApp.Justice.Interactions
     {
         [ComponentInteraction("NewIndividualEntrepreneur")]
         public async Task AplyWork()
-            => await Context.Interaction.RespondWithModalAsync<INewIndividualEntrepreneur>("newIndividualEterpreneur");
+            => await Context.Interaction.RespondWithModalAsync<INewIndividualEntrepreneur>("newIndividualEterpreneurModal");
         [ComponentInteraction("NewBizness")]
         public async Task reCreatePassport()
-            => await Context.Interaction.RespondWithModalAsync<INewBizness>("NewBizness");
+            => await Context.Interaction.RespondWithModalAsync<INewBizness>("NewBiznessModal");
 
-        [ModalInteraction("newIndividualEterpreneur")]
+        [ModalInteraction("newIndividualEterpreneurModal")]
         public async Task newIndividualEterpreneur(INewIndividualEntrepreneur modal)
         {
-            await DeferAsync(true);
+
             Passport? applicant = await Startup.appDbContext.Passport.FindAsync(int.Parse(modal.passportId));
             if (applicant == null)
             {
@@ -68,10 +68,10 @@ namespace DiscordApp.Justice.Interactions
             await channel.SendMessageAsync(embed: embed);
         }
 
-        [ModalInteraction("NewBizness")]
+        [ModalInteraction("NewBiznessModal")]
         public async Task newBizness(INewBizness modal)
         {
-            await DeferAsync(true);
+
             Passport? applicant = await Startup.appDbContext.Passport.FindAsync(int.Parse(modal.passportId));
             
             if (applicant == null)
