@@ -38,7 +38,7 @@ namespace DiscordApp
         }
         public async Task onReady()
         {
-            ChangeNicknames();
+            await ChangeNicknames();
             var myTimer = new System.Timers.Timer(6 * 60 * 60 * 1000); //calculate six hours in milliseconds
             myTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
             myTimer.Start();

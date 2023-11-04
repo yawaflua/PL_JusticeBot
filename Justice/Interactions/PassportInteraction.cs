@@ -28,6 +28,7 @@ namespace DiscordApp.Justice.Interactions
         [ModalInteraction("reworkpassportModal")]
         public async Task reCreatePassportInteraction(IReWorkPassportModal modal)
         {
+            await DeferAsync(true);
 
             int passportId;
             int.TryParse(modal.Id, out passportId);
@@ -115,6 +116,7 @@ namespace DiscordApp.Justice.Interactions
         [ModalInteraction("ReNewPassportModal")]
         public async Task renewPassportInteraction(INewPassportModal modal)
         {
+            await DeferAsync(true);
 
             string name = modal.NickName;
             string RpName = modal.RPName;
@@ -241,6 +243,7 @@ namespace DiscordApp.Justice.Interactions
         [ModalInteraction("passportModal")]
         public async Task createPassportInteraction(INewPassportModal modal)
         {
+            await DeferAsync(true);
 
             string name = modal.NickName;
             string RpName = modal.RPName;
