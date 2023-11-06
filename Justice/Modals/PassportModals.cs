@@ -22,9 +22,6 @@ namespace DiscordApp.Justice.Modals
         [InputLabel("Пол")]
         [ModalTextInput("gender", TextInputStyle.Short, maxLength: 200)]
         public string Gender { get; set; }
-        [InputLabel("Дата рождения")]
-        [ModalTextInput("BirthDay", TextInputStyle.Short, placeholder: "16.02.2023", maxLength: 100)]
-        public string Birthday { get; set; }
 
     }
 

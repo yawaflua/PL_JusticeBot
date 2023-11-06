@@ -6,6 +6,10 @@ using DiscordApp.Enums;
 using spworlds.Types;
 using DiscordApp.Justice.Modals;
 using System;
+using System.Text.Json.Nodes;
+using Microsoft.AspNetCore.Hosting;
+using DiscordApp.Types;
+using Newtonsoft.Json;
 
 namespace DiscordApp.Justice.Interactions
 {
@@ -31,7 +35,7 @@ namespace DiscordApp.Justice.Interactions
             await DeferAsync(true);
 
             int passportId;
-            int.TryParse(modal.Id, out passportId);
+            bool tryToParsePassport = int.TryParse(modal.Id, out passportId);
             bool recreatePassport = modal.IsNewPassport == 1;
             if (recreatePassport)
             {
@@ -39,13 +43,17 @@ namespace DiscordApp.Justice.Interactions
             }
             else
             { 
-                if (passportId == null) { await FollowupAsync("Айди паспорта устаревший, используйте кнопку \"Создать новый\" для создания паспорта", ephemeral: true); return; }
+                if (!tryToParsePassport) { await FollowupAsync("Айди паспорта устаревший, используйте кнопку \"Создать новый\" для создания паспорта", ephemeral: true); return; }
                 var passport = Startup.appDbContext.Passport.Where(x => x.Id == passportId).FirstOrDefault();
                 if (passport == null) { await FollowupAsync("ID паспорта не правильный, или не существует.", ephemeral: true); return; }
 
+                Startup startup = new();
                 SocketGuildUser user = Context.Guild.GetUser(Context.User.Id);
                 Random random = new();
-                User spUser = await User.CreateUser(passport.Applicant);
+                var spUser = await spworlds.Types.User.CreateUser(passport.Applicant);
+                var spUserData = await startup.getUserData(passport.Applicant);
+                string cityName;
+                string cardNumber;
                 DateTimeOffset toTime;
                 if (DateTimeOffset.FromUnixTimeSeconds(passport.birthDate).AddDays(14) < DateTimeOffset.Now)
                 {
@@ -54,6 +62,23 @@ namespace DiscordApp.Justice.Interactions
                 else
                 {
                     toTime = DateTime.Now.AddDays(14);
+                }
+
+                if (spUserData.city != null)
+                {
+                    cityName = spUserData.city.name;
+                }
+                else
+                {
+                    cityName = "Спавн";
+                }
+                if (spUserData.cardsOwned.Count > 0)
+                {
+                    cardNumber = spUserData.cardsOwned.First().number;
+                }
+                else
+                {
+                    cardNumber = "Отсутствует";
                 }
 
                 int id = random.Next(00001, 99999);
@@ -65,15 +90,16 @@ namespace DiscordApp.Justice.Interactions
                 passport.Date = nowUnixTime;
 
                 var passportData = new EmbedFieldBuilder()
-                .WithName("Данные паспорта:")
-                .WithValue(@$"
+                    .WithName("Данные паспорта:")
+                    .WithValue(@$"
 Имя: {passport.Applicant}
 РП Имя: {passport.RpName}
 Айди: {id}
 Благотворитель: {passport.Support}
 Гендер: {passport.Gender}
-Дата рождения: <t:{passport.birthDate}:D>")
-                .WithIsInline(true);
+Дата рождения: <t:{passport.birthDate}:D>
+Город: {cityName}
+Номер карты: {cardNumber}").WithIsInline(true);
 
                 var author = new EmbedAuthorBuilder()
                     .WithName(user.DisplayName)
@@ -121,23 +147,25 @@ namespace DiscordApp.Justice.Interactions
             string name = modal.NickName;
             string RpName = modal.RPName;
             int supporterInt = modal.Supporter;
-            string birthday = modal.Birthday;
             string gender = modal.Gender;
+
+            Startup startup = new ();
 
             SocketGuildUser user = Context.Guild.GetUser(Context.User.Id);
             Supporter supporter;
             Random random = new();
-            User spUser = await User.CreateUser(name);
-
+            spworlds.Types.User spUser = await spworlds.Types.User.CreateUser(name);
+            Root spUserData = await startup.getUserData(name);
             DateTimeOffset toTime;
             DateOnly birthDate;
             int id = random.Next(00001, 99999);
             while (id.ToString().Length < 5) { id = random.Next(00001, 99999); }
             long unixBirthDateTime;
-
+            string cityName;
+            string cardNumber;
             try
             {
-                birthDate = DateOnly.Parse(birthday);
+                birthDate = DateOnly.FromDateTime(spUserData.createdAt);
                 unixBirthDateTime = DateTimeOffset.Parse(birthDate.ToString()).ToUnixTimeSeconds();
                 if (birthDate.AddDays(14) < DateOnly.FromDateTime(DateTime.Now))
                 {
@@ -151,7 +179,7 @@ namespace DiscordApp.Justice.Interactions
             }
             catch
             {
-                await FollowupAsync($"Возможно, с датой `{modal.Birthday}` какая-то ошибка, попробуйте такой тип: 14.02.2023", ephemeral: true);
+                await FollowupAsync($"Сайт вернул очень странную дату... Попробуйте позже, и напишите об этом <@945317832290336798>", ephemeral: true);
                 return;
             }
 
@@ -174,6 +202,22 @@ namespace DiscordApp.Justice.Interactions
                     await FollowupAsync("Неправильно указан уровень благотворителя. Используйте числа от 0 до 3(в зависимости от уровня)", ephemeral: true);
                     return;
             }
+            if (spUserData.city != null)
+            {
+                cityName = spUserData.city.name;
+            }
+            else
+            {
+                cityName = "Спавн";
+            }
+            if (spUserData.cardsOwned.Count > 0)
+            {
+                cardNumber = spUserData.cardsOwned.First().number;
+            }
+            else
+            {
+                cardNumber = "Отсутствует";
+            }
 
             Passport passport = new()
             {
@@ -189,7 +233,7 @@ namespace DiscordApp.Justice.Interactions
             Reports report = new()
             {
                 Employee = Startup.sp.GetUser(Context.User.Id.ToString()).Result.Name,
-                type = Types.ReportTypes.editPassport
+                type = ReportTypes.editPassport
             };
             await Startup.appDbContext.Reports.AddAsync(report);
 
@@ -214,7 +258,11 @@ namespace DiscordApp.Justice.Interactions
 Айди: {id}
 Благотворитель: {passport.Support}
 Гендер: {passport.Gender}
-Дата рождения: <t:{passport.birthDate}:D>").WithIsInline(true);
+Дата рождения: <t:{passport.birthDate}:D>
+Город: {cityName}
+Номер карты: {cardNumber}").WithIsInline(true);
+
+
 
             var author = new EmbedAuthorBuilder()
                 .WithName(user.DisplayName)
@@ -248,37 +296,30 @@ namespace DiscordApp.Justice.Interactions
             string name = modal.NickName;
             string RpName = modal.RPName;
             int supporterInt = modal.Supporter;
-            string birthday = modal.Birthday;
+
             string gender = modal.Gender;
 
+            Startup startup = new();
+
             SocketGuildUser user = Context.Guild.GetUser(Context.User.Id);
-            Random random = new();
             Supporter supporter;
-            User spUser;
+            Random random = new();
+            spworlds.Types.User spUser = await spworlds.Types.User.CreateUser(name);
+            Root spUserData = await startup.getUserData(name);
             DateTimeOffset toTime;
             DateOnly birthDate;
-            long unixBirthDateTime;
-
-            try
-            {
-                spUser = await User.CreateUser(name);
-            }
-            catch
-            {
-                await FollowupAsync("Игрок с таким ником не найден!", ephemeral: true);
-                return;
-            }
-
             int id = random.Next(00001, 99999);
             while (id.ToString().Length < 5) { id = random.Next(00001, 99999); }
-
+            long unixBirthDateTime;
+            string cityName;
+            string cardNumber;
             try
             {
-                birthDate = DateOnly.Parse(birthday);
+                birthDate = DateOnly.FromDateTime(spUserData.createdAt);
                 unixBirthDateTime = DateTimeOffset.Parse(birthDate.ToString()).ToUnixTimeSeconds();
                 if (birthDate.AddDays(14) < DateOnly.FromDateTime(DateTime.Now))
                 {
-                    await FollowupAsync($"Возможно, игрок {name} играет больше двух недель, и бесплатный паспорт ему не положен! Оформляю паспорт на два месяца...", ephemeral: true);
+                    await FollowupAsync($"Возможно, игрок {name} больше не новичек, и бесплатный паспорт ему не положен! Оформляю паспорт на месяц...", ephemeral: true);
                     toTime = DateTimeOffset.Now.AddMonths(2);
                 }
                 else
@@ -288,7 +329,7 @@ namespace DiscordApp.Justice.Interactions
             }
             catch
             {
-                await FollowupAsync($"Возможно, с датой `{modal.Birthday}` какая-то ошибка, попробуйте такой тип: 14.02.2023", ephemeral: true);
+                await FollowupAsync($"Сайт вернул очень странную дату... Попробуйте позже, и напишите об этом <@945317832290336798>", ephemeral: true);
                 return;
             }
 
@@ -311,13 +352,29 @@ namespace DiscordApp.Justice.Interactions
                     await FollowupAsync("Неправильно указан уровень благотворителя. Используйте числа от 0 до 3(в зависимости от уровня)", ephemeral: true);
                     return;
             }
+            if (spUserData.city != null)
+            {
+                cityName = spUserData.city.name;
+            }
+            else
+            {
+                cityName = "Спавн";
+            }
+            if (spUserData.cardsOwned.Count > 0)
+            {
+                cardNumber = spUserData.cardsOwned.First().number;
+            }
+            else
+            {
+                cardNumber = "Отсутствует";
+            }
 
             Passport passport = new()
             {
                 Employee = user.Id,
                 RpName = RpName,
                 Gender = gender,
-                Date = DateTimeOffset.Now.ToUnixTimeSeconds(),
+                Date = toTime.ToUnixTimeSeconds(),
                 birthDate = unixBirthDateTime,
                 Applicant = name,
                 Id = id,
@@ -330,8 +387,9 @@ namespace DiscordApp.Justice.Interactions
                 while (!isUnical)
                 {
                     id = random.Next(00001, 99999);
-                    passport.Id = id;
                     while (id.ToString().Length < 5) { id = random.Next(00001, 99999); }
+                    passport.Id = id;
+                    Console.WriteLine(passport.Id);
                     if (Startup.appDbContext.Passport.FindAsync(passport.Id).Result == null) { break; }
                 }
             }
@@ -342,9 +400,11 @@ namespace DiscordApp.Justice.Interactions
 Имя: {passport.Applicant}
 РП Имя: {passport.RpName}
 Айди: {id}
-Благотворитель: {(int)passport.Support }
+Благотворитель: {passport.Support}
 Гендер: {passport.Gender}
-Дата рождения: <t:{passport.birthDate}:D>")
+Дата рождения: <t:{passport.birthDate}:D>
+Город: {cityName}
+Номер карты: {cardNumber}")
                 .WithIsInline(true);
 
             var author = new EmbedAuthorBuilder()
@@ -365,7 +425,7 @@ namespace DiscordApp.Justice.Interactions
             Reports report = new()
             {
                 Employee = ((IGuildUser)Context.User).DisplayName,
-                type = Types.ReportTypes.NewPassport
+                type = ReportTypes.NewPassport
             };
             await Startup.appDbContext.Reports.AddAsync(report);
             await Startup.appDbContext.Passport.AddAsync(passport);

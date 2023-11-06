@@ -84,63 +84,6 @@ namespace DiscordApp.Discord.Commands
             int allCount = 0;
             var allReports = Startup.appDbContext.Reports.ToArray();
             var allEmployee = new Dictionary<string, int>();
-            string token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijk0NTMxNzgzMjI5MDMzNjc5OCIsInRva2VuVmVyc2lvbiI6MCwiaXAiOiIxODUuMTA0LjExMi4xODAiLCJpYXQiOjE2OTkxOTA5MzMsImV4cCI6MTcwMTc4MjkzM30.Z9ykVYIIsN0bF0BlNV6sgwdiRu-GNx-olmKRxl6OJHk";
-            var cookieContainer = new CookieContainer();
-            var handler = new HttpClientHandler() { CookieContainer = cookieContainer };
-            HttpClient client = new(handler);
-            client.BaseAddress = new Uri("https://spworlds.ru/api/");
-
-            cookieContainer.Add(client.BaseAddress, new Cookie("jeff", token));
-            string ok =  @"{
-    ""id"": ""945317832290336798"",
-    ""isAdmin"": false,
-    ""minecraftUUID"": ""775f00d30da34275967d58cb50838b9f"",
-    ""accounts"": [
-        {
-                ""id"": ""095ee127-578b-479e-90af-21b679546e09"",
-            ""serverId"": ""spb"",
-            ""roles"": [],
-            ""isBanned"": false,
-            ""banReason"": null,
-            ""server"": {
-                    ""id"": ""spb"",
-                ""name"": ""СПб"",
-                ""icon"": 1,
-                ""hasSite"": true,
-                ""economy"": {
-                        ""campaignPrice"": 32,
-                    ""pinPrice"": 0,
-                    ""adPrice"": 32
-                }
-                }
-            },
-        {
-                ""id"": ""96a89c09-63a1-44e9-9e10-abbf9f78483c"",
-            ""serverId"": ""pl"",
-            ""roles"": [
-                ""mapmaker""
-            ],
-            ""isBanned"": false,
-            ""banReason"": null,
-            ""server"": {
-                    ""id"": ""pl"",
-                ""name"": ""PoopLand"",
-                ""icon"": 4,
-                ""hasSite"": true,
-                ""economy"": {
-                        ""campaignPrice"": 32,
-                    ""pinPrice"": 0,
-                    ""adPrice"": 32
-                }
-                }
-            }
-    ],
-    ""bedrockUsername"": ""YaFlay"",
-    ""username"": ""YaFlay"",
-    ""hasTOTP"": false
-}";
-        var content = new StringContent(ok) ;
-        await client.PostAsync("auth/refresh_token", content);
             
 
             foreach (var report in allReports)
@@ -159,11 +102,9 @@ namespace DiscordApp.Discord.Commands
             {
                 try
                 {
-                    var request = await client.GetAsync($"pl/accounts/{employee.Key}");
-                    Console.WriteLine(request.Content.ReadAsStringAsync().Result);
-                    JsonNode response = await request.Content.ReadFromJsonAsync<JsonNode>();
-
-                    await Startup.sp.CreateTransaction(response["cardsOwned"][0]["number"].ToString(), employee.Value, $"zp {employee.Key}");
+                    
+                    Startup startup = new ();
+                    await Startup.sp.CreateTransaction(startup.getUserData(employee.Key).Result.cardsOwned.First().number, employee.Value, $"zp {employee.Key}");
                     await Console.Out.WriteLineAsync($"{employee.Key}, {employee.Value}");
                     allCount += employee.Value;
                 }
