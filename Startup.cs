@@ -4,8 +4,11 @@ using Discord.Interactions;
 using Discord.WebSocket;
 using DiscordApp;
 using DiscordApp.Auth;
+using DiscordApp.Controllers;
 using DiscordApp.Database;
 using DiscordApp.Types;
+using DotNetEd.CoreAdmin;
+using DotNetEd.CoreAdmin.Controllers;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
@@ -114,6 +117,7 @@ namespace DiscordApp
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddCoreAdmin("yawaflua");
             services
                     //.AddHostedService<DiscordBotService>()
                     .AddHostedService<JusticeBotService>()
@@ -151,11 +155,11 @@ namespace DiscordApp
                     c.RouteTemplate = "/swagger/v1/swagger.json";
                 });
             }
-
+            app.UseCoreAdminCustomAuth(k => Task.FromResult(true));
             app.UseStaticFiles();
             app.UseRouting();
             app.UseCors();
-
+            app.UseCoreAdminCustomUrl("admin/private/panel");
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseEndpoints(endpoints =>

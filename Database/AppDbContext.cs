@@ -14,6 +14,8 @@ namespace DiscordApp.Database
         public DbSet<BooksPatents> BookPatents { get; set; }
         public DbSet<Bizness> Bizness { get; set; }
         public DbSet<Reports> Reports { get; set; }
+        public DbSet<Certificate> Certificates { get; set; }
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

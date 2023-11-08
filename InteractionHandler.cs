@@ -28,7 +28,6 @@ namespace DiscordApp
             handler.Log += LogAsync;
 
             await handler.AddModulesAsync(Assembly.GetEntryAssembly(), services);
-            var guildCommand = new SlashCommandBuilder();
 
             client.InteractionCreated += HandleInteraction;
         }

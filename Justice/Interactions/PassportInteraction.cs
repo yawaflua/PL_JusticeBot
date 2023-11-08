@@ -158,8 +158,8 @@ namespace DiscordApp.Justice.Interactions
             Root spUserData = await startup.getUserData(name);
             DateTimeOffset toTime;
             DateOnly birthDate;
-            int id = random.Next(00001, 99999);
-            while (id.ToString().Length < 5) { id = random.Next(00001, 99999); }
+            int id;
+            Utilities.IdChecker.IdLenghtIsLower(out id);
             long unixBirthDateTime;
             string cityName;
             string cardNumber;
@@ -242,8 +242,7 @@ namespace DiscordApp.Justice.Interactions
                 bool isUnical = false;
                 while (!isUnical)
                 {
-                    id = random.Next(00001, 99999);
-                    while (id.ToString().Length < 5) { id = random.Next(00001, 99999); }
+                    Utilities.IdChecker.IdLenghtIsLower(out id);
                     passport.Id = id;
                     Console.WriteLine(passport.Id);
                     if (Startup.appDbContext.Passport.FindAsync(passport.Id).Result == null) { break; }
@@ -256,7 +255,7 @@ namespace DiscordApp.Justice.Interactions
 Имя: {passport.Applicant}
 РП Имя: {passport.RpName}
 Айди: {id}
-Благотворитель: {passport.Support}
+Благотворитель: {(int)passport.Support}
 Гендер: {passport.Gender}
 Дата рождения: <t:{passport.birthDate}:D>
 Город: {cityName}

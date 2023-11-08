@@ -98,13 +98,14 @@ namespace DiscordApp.Discord.Commands
                 }
 
             }
+            Startup startup = new();
             foreach (var employee in allEmployee)
             {
                 try
                 {
-                    
-                    Startup startup = new ();
-                    await Startup.sp.CreateTransaction(startup.getUserData(employee.Key).Result.cardsOwned.First().number, employee.Value, $"zp {employee.Key}");
+
+                    var userData = await startup.getUserData(employee.Key);
+                    await Startup.sp.CreateTransaction(userData.cardsOwned.First().number, employee.Value, $"zp {employee.Key}");
                     await Console.Out.WriteLineAsync($"{employee.Key}, {employee.Value}");
                     allCount += employee.Value;
                 }
