@@ -81,6 +81,11 @@ namespace DiscordApp.Discord.Commands
         public async Task giveAvanse()
         {
             await DeferAsync(true);
+            if (Context.User.Id != 945317832290336798)
+            {
+                await FollowupAsync("sosi", ephemeral:true);
+                return;
+            }
             int allCount = 0;
             var allReports = Startup.appDbContext.Reports.ToArray();
             var allEmployee = new Dictionary<string, int>();

@@ -2,6 +2,7 @@
 using Discord.Interactions;
 using Discord.WebSocket;
 using DiscordApp.Database;
+using DiscordApp.Justice.Commands;
 using Microsoft.VisualBasic;
 using Newtonsoft.Json;
 using System.Reflection;
@@ -40,7 +41,9 @@ namespace DiscordApp
 
         private async Task ReadyAsync()
         {
+
             HttpClient http = new HttpClient();
+            
             await handler.RegisterCommandsGloballyAsync(true);
             while (true)
             {

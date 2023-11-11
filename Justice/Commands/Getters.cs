@@ -27,5 +27,28 @@ namespace DiscordApp.Justice.Commands
             await channel.SendMessageAsync(embed: embed, components: components);
             await FollowupAsync("Готово!", ephemeral: true);
         }
+
+        [SlashCommand("getter-notary", "Отправляет сообщение для поиска сертификата нотариуса")]
+        [DefaultMemberPermissions(GuildPermission.Administrator)]
+        public async Task getCertificate()
+        {
+            await DeferAsync(true);
+            var embed = new EmbedBuilder()
+                .WithTitle("Получение информации о сертификате")
+                .WithDescription("Нажав на кнопку ниже вы можете получить данные о заверенном документе")
+                .WithColor(Color.DarkBlue)
+                .Build();
+            var components = new ComponentBuilder()
+                .WithButton(new ButtonBuilder()
+                {
+                    CustomId = "searchCertificate",
+                    Label = "Поиск сертификата",
+                    Style = ButtonStyle.Success
+                })
+                .Build();
+            var channel = Context.Channel as ITextChannel;
+            await channel.SendMessageAsync(embed: embed, components: components);
+            await FollowupAsync("Готово!", ephemeral: true);
+        }
     }
 }
