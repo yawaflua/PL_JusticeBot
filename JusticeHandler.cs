@@ -3,8 +3,9 @@ using Discord.Interactions;
 using Discord.WebSocket;
 using DiscordApp.Database;
 using Microsoft.VisualBasic;
+using Newtonsoft.Json;
 using System.Reflection;
-
+using System.Text.Json.Nodes;
 
 namespace DiscordApp
 {
@@ -39,8 +40,17 @@ namespace DiscordApp
 
         private async Task ReadyAsync()
         {
-            await client.SetGameAsync("yaflay.ru", "https://yaflay.ru/", ActivityType.Watching);
+            HttpClient http = new HttpClient();
             await handler.RegisterCommandsGloballyAsync(true);
+            while (true)
+            {
+                var request = await http.GetAsync("https://api.mcsrvstat.us/3/pl.spworlds.ru");
+                JsonNode responseAboutPL = JsonNode.Parse(request.Content.ReadAsStringAsync().Result);
+                if (responseAboutPL["online"].Equals("false")) await client.SetGameAsync($"выключенный PL", "https://yaflay.ru/", ActivityType.Watching);
+                else await client.SetGameAsync($"онлайн на PL: {responseAboutPL["players"]["online"]}", "https://yaflay.ru/", ActivityType.Watching);
+                await Task.Delay(30000);
+            }
+
         }
 
         private async Task HandleInteraction(SocketInteraction interaction)

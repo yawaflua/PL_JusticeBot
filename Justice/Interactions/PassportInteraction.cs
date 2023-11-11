@@ -159,7 +159,7 @@ namespace DiscordApp.Justice.Interactions
             DateTimeOffset toTime;
             DateOnly birthDate;
             int id;
-            Utilities.IdChecker.IdLenghtIsLower(out id);
+            Utilities.Utilities.IdGenerator(out id);
             long unixBirthDateTime;
             string cityName;
             string cardNumber;
@@ -242,7 +242,7 @@ namespace DiscordApp.Justice.Interactions
                 bool isUnical = false;
                 while (!isUnical)
                 {
-                    Utilities.IdChecker.IdLenghtIsLower(out id);
+                    Utilities.Utilities.IdGenerator(out id);
                     passport.Id = id;
                     Console.WriteLine(passport.Id);
                     if (Startup.appDbContext.Passport.FindAsync(passport.Id).Result == null) { break; }

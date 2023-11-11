@@ -29,12 +29,6 @@ namespace DiscordApp.Controllers
             })
             .ToArray();
         }
-        public static async Task<bool> isAllowed(IServiceProvider services)
-        {
-            var context = services.GetRequiredService<ActionContext>();
-            if (context.HttpContext.Request.Cookies["geff"] == "ok") { return true; }
-            else { return false; }
-
-        }
+        
     }
 }

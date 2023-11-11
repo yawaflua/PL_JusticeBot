@@ -15,6 +15,7 @@ namespace DiscordApp.Justice.Interactions
         {
             await DeferAsync(true);
             int passportId;
+            string thumbnailUrl;
             Passport passport;
             bool isInteger = int.TryParse(modal.passport, out passportId);
             if (isInteger)
@@ -42,11 +43,18 @@ namespace DiscordApp.Justice.Interactions
                 new EmbedFieldBuilder().WithName("Годен до").WithValue($"<t:{passport.Date}:D>").WithIsInline(true),
                 new EmbedFieldBuilder().WithName("Паспортист").WithValue($"<@{passport.Employee}>").WithIsInline(true)
             };
-            var spUser = await spworlds.Types.User.CreateUser(passport.Applicant);
-            var embed = new EmbedBuilder()
+            try
+            {
+                thumbnailUrl = spworlds.Types.User.CreateUser(passport.Applicant).Result.GetSkinPart(spworlds.Types.SkinPart.face);
+            }
+            catch
+            {
+                thumbnailUrl = null;
+            }
+             var embed = new EmbedBuilder()
                 .WithTitle("**Информация о паспорте**")
                 .WithFields(fields)
-                .WithThumbnailUrl(spUser.GetSkinPart(spworlds.Types.SkinPart.face))
+                .WithThumbnailUrl(thumbnailUrl)
                 .Build();
             await FollowupAsync(embed:embed, ephemeral: true);
                 

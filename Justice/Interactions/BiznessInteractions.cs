@@ -26,8 +26,10 @@ namespace DiscordApp.Justice.Interactions
                 return;
             }
             User spApplicant = await User.CreateUser(applicant.Applicant);
-            var employees = new List<int>();
-            employees.Add(applicant.Id);
+            var employees = new List<int>
+            {
+                applicant.Id
+            };
 
             Bizness biznessDB = new()
             {

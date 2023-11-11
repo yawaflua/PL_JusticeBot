@@ -50,7 +50,7 @@ namespace DiscordApp.Auth
 
         private bool IsValidApiKey(string apiKey)
         {
-            return true;
+            return false;
         }
         private bool CheckForInvalidCharacters(string value)
         {
