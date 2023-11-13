@@ -18,8 +18,9 @@ namespace DiscordApp.Justice.Interactions
         [ModalInteraction("newIndividualEterpreneurModal")]
         public async Task newIndividualEterpreneur(INewIndividualEntrepreneur modal)
         {
-
-            Passport? applicant = await Startup.appDbContext.Passport.FindAsync(int.Parse(modal.passportId));
+            await DeferAsync(true);
+            Passport? applicant = Startup.appDbContext.Passport.FirstOrDefault(k => k.Id == int.Parse(modal.passportId));
+            await Console.Out.WriteLineAsync(applicant.ToString());
             if (applicant == null)
             {
                 await FollowupAsync("Ошибка! Такого паспорта не существует. Попробуйте старого бота.", ephemeral: true);

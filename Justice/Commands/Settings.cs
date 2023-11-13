@@ -17,7 +17,7 @@ namespace DiscordApp.Discord.Commands
         [DefaultMemberPermissions(GuildPermission.Administrator)]
         public async Task addAutoBranches(IChannel channel, string branchName = "Обсуждение")
         {
-            //await DeferAsync(true);
+            await DeferAsync(true);
             Autobranches autobranches = new()
             {
                 ChannelId = channel.Id,

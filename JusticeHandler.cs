@@ -47,11 +47,17 @@ namespace DiscordApp
             await handler.RegisterCommandsGloballyAsync(true);
             while (true)
             {
-                var request = await http.GetAsync("https://api.mcsrvstat.us/3/pl.spworlds.ru");
-                JsonNode responseAboutPL = JsonNode.Parse(request.Content.ReadAsStringAsync().Result);
-                if (responseAboutPL["online"].Equals("false")) await client.SetGameAsync($"выключенный PL", "https://yaflay.ru/", ActivityType.Watching);
-                else await client.SetGameAsync($"онлайн на PL: {responseAboutPL["players"]["online"]}", "https://yaflay.ru/", ActivityType.Watching);
-                await Task.Delay(30000);
+                try
+                {
+                    var request = await http.GetAsync("https://api.mcsrvstat.us/3/pl.spworlds.ru");
+                    JsonNode responseAboutPL = JsonNode.Parse(request.Content.ReadAsStringAsync().Result);
+                    if (responseAboutPL["online"].Equals("false")) await client.SetGameAsync($"выключенный PL", "https://yaflay.ru/", ActivityType.Watching);
+                    else await client.SetGameAsync($"онлайн на PL: {responseAboutPL["players"]["online"]}", "https://yaflay.ru/", ActivityType.Watching);
+                }
+                finally
+                {
+                    await Task.Delay(30000);
+                }
             }
 
         }
