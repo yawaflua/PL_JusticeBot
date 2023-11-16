@@ -33,7 +33,7 @@ namespace DiscordApp
             await client.LoginAsync(TokenType.Bot, "MTE2NjA3OTk3NjQ0NjEwMzYwMg.GAKOIo.4af972Wh11G0EF4O5tNYb7l-vt5OwMc4HPRnjE");
             await client.StartAsync();
             await interactionHandler.InitializeAsync();
-
+            Startup.discordSocketClient = client;
             await Task.Delay(Timeout.Infinite);
         }
 

@@ -1,6 +1,7 @@
 using Discord;
 using DiscordApp.Database;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 using System.Text.Json.Nodes;
 
 namespace DiscordApp.Controllers
@@ -10,8 +11,8 @@ namespace DiscordApp.Controllers
     public class redirects : ControllerBase
     {
 
-        [HttpGet("/redirects/{uri}")]
-        public IActionResult Get(string uri, [FromBody] string? bodyContent)
+        [HttpGet("/redirects/{uri}&channelid={channelid}")]
+        public async Task<IActionResult> Get(string uri, [FromBody] string? bodyContent, ulong channelid)
         {
             var data = Startup.appDbContext.Redirects.First(k => k.Id == uri);
             if (data.RedirectType == Types.RedirectType.None)
@@ -22,18 +23,16 @@ namespace DiscordApp.Controllers
                 return Redirect(data.url);
             }else if (data.RedirectType == Types.RedirectType.Redirected)
             {
-                JsonNode jsonBodyContent = JsonNode.Parse(bodyContent);
-                string[] paymentData = jsonBodyContent["data"].ToString().Split(";");
-                var channelId = paymentData[1].Split(":")[1];
-                var channel = Startup.discordSocketClient.GetChannel(ulong.Parse(channelId)) as ITextChannel;
-                var message = channel.GetMessagesAsync().LastAsync().Result.Last() as IUserMessage;
-                message.ModifyAsync(func =>
+                var guild = Startup.discordSocketClient.GetGuild(1107742957458685985);
+                var channel = guild.GetChannel(channelid) as ITextChannel;
+                var message = channel.GetMessagesAsync().LastOrDefaultAsync().Result.FirstOrDefault() as IUserMessage;
+                await message.ModifyAsync(func =>
                 {
                     func.Content = "Успешно оплачено!";
                     func.Components = new ComponentBuilder()
                         .WithButton("Создание заявки", "addBaseOnMapModalSender")
                         .Build();
-                }).RunSynchronously();
+                });
 
                 return Redirect(message.GetJumpUrl());
             }
@@ -42,23 +41,17 @@ namespace DiscordApp.Controllers
                 return BadRequest();
             }
         }
-        [HttpPost("/redirects/{uri}")]
-        public IActionResult Post(string uri, [FromBody] string bodyContent)
+        [HttpGet("/redirects/{uri}")]
+        public IActionResult Post(string uri)
         {
-            JsonNode jsonBodyContent = JsonNode.Parse(bodyContent);
-            string[] paymentData = jsonBodyContent["data"].ToString().Split(";");
-            var channelId = paymentData[1].Split(":")[1];
-            var channel = Startup.discordSocketClient.GetChannel(ulong.Parse(channelId)) as ITextChannel;
-            var message = channel.GetMessagesAsync().LastAsync().Result.Last() as IUserMessage;
-            message.ModifyAsync(func =>
-            {
-                func.Content = "Успешно оплачено!";
-                func.Components = new ComponentBuilder()
-                    .WithButton("Создание заявки", "addBaseOnMapModalSender")
-                    .Build();
-            }).RunSynchronously();
+            var data = Startup.appDbContext.Redirects.First(k => k.Id == uri);
+            
+            data.RedirectType = Types.RedirectType.Redirected;
+            Startup.appDbContext.Redirects.Update(data);
+            Startup.appDbContext.SaveChanges();
+            return Redirect(data.url);
 
-            return Ok(message.GetJumpUrl());
+
         }
 
     }

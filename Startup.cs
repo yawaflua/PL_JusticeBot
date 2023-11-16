@@ -187,7 +187,6 @@ namespace DiscordApp
 
             serviceProvider = services.BuildServiceProvider();
             appDbContext = serviceProvider.GetRequiredService<AppDbContext>();
-            discordSocketClient = serviceProvider.GetRequiredService<DiscordSocketClient>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

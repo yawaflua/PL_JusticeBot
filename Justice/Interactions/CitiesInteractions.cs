@@ -11,20 +11,24 @@ namespace DiscordApp.Justice.Interactions
         [ComponentInteraction("addBaseOnMap")]
         public async Task addBaseInteraction()
         {
-            var redirectUri = Guid.NewGuid().ToString();
             await DeferAsync(true);
+            var thread = await ((ITextChannel)Context.Channel).CreateThreadAsync($"{Context.User.GlobalName}-addCityOnMap", ThreadType.PrivateThread) as IThreadChannel;
+            await thread.AddUserAsync(((IGuildUser)Context.User));
+            await FollowupAsync(thread.Mention, ephemeral:true);
+            var redirectUri = Guid.NewGuid().ToString();
+
             var paymentData = new spworlds.Types.PaymentData()
             {
                 Amount = 16,
-                Data = $"user:{Context.User.Id};channel:{Context.Channel.Id};",
-                RedirectUrl = $"https://discord.yawaflua.ru/redirects/{redirectUri}",
+                Data = $"user:{Context.User.Id};channel:{thread.Id};",
+                RedirectUrl = $"https://discord.yawaflua.ru/redirects/{redirectUri}&channelid={thread.Id}",
                 WebHookUrl = $"https://discord.yawaflua.ru/redirects/{redirectUri}"
             };
             var uri = await Startup.sp.InitPayment(paymentData);
             var redirectTable = new Redirects() { Id = redirectUri , url = uri};
             Startup.appDbContext.Redirects.Add(redirectTable);
             Startup.appDbContext.SaveChanges();
-            await FollowupAsync("Нажмите на кнопку ниже для оплаты", components: new ComponentBuilder().WithButton("Оплатить", url: $"https://discord.yawaflua.ru/redirects/{redirectUri}", style: ButtonStyle.Link).Build(), ephemeral: true);
+            await thread.SendMessageAsync("Нажмите на кнопку ниже для оплаты", components: new ComponentBuilder().WithButton("Оплатить", url: $"https://discord.yawaflua.ru/redirects/{redirectUri}", style: ButtonStyle.Link).Build());
 
         }
 
@@ -67,6 +71,8 @@ namespace DiscordApp.Justice.Interactions
             var channel = Context.Guild.GetTextChannel(1174722397820174439);
             await channel.SendMessageAsync("@ #here", embed: embed, components: components);
             await FollowupAsync("Заявка подана и передана ответственным лицам. Ожидайте!", ephemeral: true);
+            var threadChannel = Context.Channel as IThreadChannel;
+            await threadChannel.ModifyAsync(k => k.Archived = true);
         }
 
         [ComponentInteraction("accessNewBase")]
@@ -115,15 +121,36 @@ namespace DiscordApp.Justice.Interactions
             try
             {
                 await startup.addSityOnMap(city);
-                await FollowupAsync("Все готово!");
+                await FollowupAsync("Все готово!", ephemeral: true);
             }
             catch
             {
-                await FollowupAsync("Какая-то ошибка, чекни логи");
+                await FollowupAsync("Какая-то ошибка, чекни логи", ephemeral: true);
+            }
+
+        }
+        [ComponentInteraction("declineNewBase")]
+        public async Task declineBaseOnMap()
+        {
+            await DeferAsync(true);
+
+            var components = new ComponentBuilder()
+                .WithButton(customId: "accessNewBase", label: "✅", disabled: true)
+                .WithButton(customId: "declineNewBase", label: "❌", disabled: true)
+                .Build();
+
+            await ModifyOriginalResponseAsync(func => { func.Components = components; func.Content = $"Заявку отозвал {Context.User.Mention}"; });
+
+            try
+            {
+                await FollowupAsync("Все готово!", ephemeral:true);
+            }
+            catch
+            {
+                await FollowupAsync("Какая-то ошибка, чекни логи", ephemeral:true);
             }
 
         }
 
-        
     }
 }
