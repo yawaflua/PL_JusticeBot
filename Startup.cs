@@ -203,7 +203,7 @@ namespace DiscordApp
             }
             app.UseStaticFiles();
             app.UseRouting();
-            app.UseCors(k => { k.AllowAnyHeader(); k.AllowAnyMethod(); k.AllowAnyOrigin(); });
+            app.UseCors(k => { k.AllowAnyHeader(); k.AllowAnyMethod(); k.AllowAnyOrigin(); k.WithMethods("POST", "GET"); });
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

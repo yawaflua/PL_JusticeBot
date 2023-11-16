@@ -17,14 +17,14 @@ namespace DiscordApp.Justice.Interactions
                 Amount = 16,
                 Data = $"user:{Context.User.Id};channel:{Context.Channel.Id};",
                 RedirectUrl = Context.Interaction.GetOriginalResponseAsync().Result.GetJumpUrl(),
-                WebHookUrl = "https://api.yawaflua.ru/addOnMap/"
+                WebHookUrl = "https://discord.yawaflua.ru/addOnMap/"
             };
             var uri = await Startup.sp.InitPayment(paymentData);
             var redirectUri = Guid.NewGuid().ToString();
             var redirectTable = new Redirects() { Id = redirectUri , url = uri};
             Startup.appDbContext.Redirects.Add(redirectTable);
             Startup.appDbContext.SaveChanges();
-            await FollowupAsync("Нажмите на кнопку ниже для оплаты", components: new ComponentBuilder().WithButton("Оплатить", url: $"https://api.yawaflua.ru/redirects/{redirectUri}", style: ButtonStyle.Link).Build());//, ephemeral: true);
+            await FollowupAsync("Нажмите на кнопку ниже для оплаты", components: new ComponentBuilder().WithButton("Оплатить", url: $"https://discord.yawaflua.ru/redirects/{redirectUri}", style: ButtonStyle.Link).Build());//, ephemeral: true);
 
         }
 
