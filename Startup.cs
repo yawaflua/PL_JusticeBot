@@ -10,6 +10,7 @@ using DiscordApp.Types;
 using DotNetEd.CoreAdmin;
 using DotNetEd.CoreAdmin.Controllers;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Primitives;
@@ -28,6 +29,7 @@ namespace DiscordApp
         public static AppDbContext appDbContext;
         public static SPWorlds sp;
         private readonly HttpClient client;
+        public static DiscordSocketClient discordSocketClient;
         private readonly DiscordSocketConfig socketConfig = new()
         {
             GatewayIntents = GatewayIntents.All,
@@ -106,13 +108,61 @@ namespace DiscordApp
             var responseMessage = client.PostAsync("auth/refresh_token", content).Result;
             Console.WriteLine(responseMessage.Content.ReadAsStringAsync().Result.ToString());
         }
-        public async Task<Root> getUserData(string userName)
+        public async Task<SPUser> getUserData(string userName)
         {
             var request = await client.GetAsync($"pl/accounts/{userName}");
-            await Console.Out.WriteLineAsync(request.Content.ToString());
-            Root response = JsonConvert.DeserializeObject<Root>(request.Content.ReadAsStringAsync().Result.ToString());
+            await Console.Out.WriteLineAsync(request.Content.ReadAsStringAsync().Result);
+            SPUser response = JsonConvert.DeserializeObject<SPUser>(request.Content.ReadAsStringAsync().Result.ToString());
             return response;
         }
+        public async Task<IEnumerable<SPCity>> getAllSities()
+        {
+            var citiesArray = new List<SPCity>();
+            var request = await client.GetAsync("https://spworlds.ru/api/pl/cities");
+            JsonNode jsonBody = await request.Content.ReadFromJsonAsync<JsonNode>();
+            foreach (JsonNode node in jsonBody.AsArray())
+            {
+                citiesArray.Add(JsonConvert.DeserializeObject<SPCity>(node.ToJsonString()));
+            }
+            return citiesArray;
+        }
+
+        public async Task<SPCity?> addSityOnMap(SPCity city)
+        {
+            try
+            {
+                var request = await client.PostAsync("https://spworlds.ru/api/pl/cities", JsonContent.Create(city));
+                if (request.StatusCode.HasFlag(HttpStatusCode.OK))
+                {
+                    return city;
+                }
+                else
+                {
+                    throw new Exception("Unknown error from site!");
+                }
+            }
+            catch (Exception ex)
+            {
+                await Console.Out.WriteLineAsync(ex.Message);
+                return null;
+            }
+
+        }
+
+        public async Task<SPCity> deleteSityFromMap(SPCity city)
+        {
+            var request = await client.DeleteAsync($"https://spworlds.ru/api/pl/cities/{city.id}");
+            if (request.StatusCode.Equals(200))
+            {
+                return city;
+            }
+            else
+            {
+                throw new Exception("Unknown error from site!");
+            }
+
+        }
+
 
         public void ConfigureServices(IServiceCollection services)
         {
@@ -132,16 +182,12 @@ namespace DiscordApp
                 .AddSingleton<JusticeHandler>()
                 .AddSingleton(sp)
                 .AddDbContext<AppDbContext>(c => c.UseNpgsql(@"Host=185.104.112.180;Username=yaflay;Password=hQgtruasSS;Database=poopland"))
-                .AddAuthentication(options =>
-                {
-                    options.DefaultAuthenticateScheme = "Bearer";
-                    options.DefaultChallengeScheme = "Bearer";
-                }).AddScheme<AuthenticationSchemeOptions, AuthanticationByBearerToken>("Bearer", options => { });
+                ;
 
 
             serviceProvider = services.BuildServiceProvider();
             appDbContext = serviceProvider.GetRequiredService<AppDbContext>();
-
+            discordSocketClient = serviceProvider.GetRequiredService<DiscordSocketClient>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -155,13 +201,9 @@ namespace DiscordApp
                     c.RouteTemplate = "/swagger/v1/swagger.json";
                 });
             }
-            app.UseCoreAdminCustomAuth(k => Task.FromResult(true));
             app.UseStaticFiles();
             app.UseRouting();
-            app.UseCors();
-            app.UseCoreAdminCustomUrl("admin/private/panel");
-            app.UseAuthentication();
-            app.UseAuthorization();
+            app.UseCors(k => { k.AllowAnyHeader(); k.AllowAnyMethod(); k.AllowAnyOrigin(); });
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

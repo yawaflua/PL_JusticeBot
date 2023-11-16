@@ -155,7 +155,7 @@ namespace DiscordApp.Justice.Interactions
             Supporter supporter;
             Random random = new();
             spworlds.Types.User spUser = await spworlds.Types.User.CreateUser(name);
-            Root spUserData = await startup.getUserData(name);
+            var spUserData = await startup.getUserData(name);
             DateTimeOffset toTime;
             DateOnly birthDate;
             int id;
@@ -304,7 +304,7 @@ namespace DiscordApp.Justice.Interactions
             Supporter supporter;
             Random random = new();
             spworlds.Types.User spUser = await spworlds.Types.User.CreateUser(name);
-            Root spUserData = await startup.getUserData(name);
+            var spUserData = await startup.getUserData(name);
             DateTimeOffset toTime;
             DateOnly birthDate;
             int id = random.Next(00001, 99999);

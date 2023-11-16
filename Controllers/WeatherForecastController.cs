@@ -1,34 +1,42 @@
+using Discord;
+using DiscordApp.Database;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json.Nodes;
 
 namespace DiscordApp.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class WeatherForecastController : ControllerBase
+    public class redirects : ControllerBase
     {
-        private static readonly string[] Summaries = new[]
-        {
-        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-    };
 
-        private readonly ILogger<WeatherForecastController> _logger;
-
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        [HttpGet("/redirects/{uri}")]
+        public IActionResult Get(string uri)
         {
-            _logger = logger;
+            var data = Startup.appDbContext.Redirects.First(k => k.Id == uri);
+            Startup.appDbContext.Redirects.Remove(data);
+            Startup.appDbContext.SaveChanges();
+            return Redirect(data.url);
         }
 
-        [HttpGet(Name = "GetWeatherForecast")]
-        public IEnumerable<WeatherForecast> Get()
+        [HttpPost("addOnMap")]
+        public ActionResult Create(string bodyContent)
         {
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+            JsonNode jsonBodyContent = JsonNode.Parse(bodyContent);
+            string[] paymentData = jsonBodyContent["data"].ToString().Split(";");
+            var channelId = paymentData[1].Split(":")[1];
+            var channel = Startup.discordSocketClient.GetChannel(ulong.Parse(channelId)) as ITextChannel;
+            var message = channel.GetMessagesAsync().LastAsync().Result.Last() as IUserMessage;
+            message.ModifyAsync(func =>
             {
-                Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                TemperatureC = Random.Shared.Next(-20, 55),
-                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-            })
-            .ToArray();
+                func.Content = "Успешно оплачено!";
+                func.Components = new ComponentBuilder()
+                    .WithButton("Создание заявки", "addBaseOnMapModalSender")
+                    .Build();
+            }).RunSynchronously();
+
+            return Ok();
         }
-        
+
     }
 }

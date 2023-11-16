@@ -51,7 +51,8 @@ namespace DiscordApp
                 {
                     var request = await http.GetAsync("https://api.mcsrvstat.us/3/pl.spworlds.ru");
                     JsonNode responseAboutPL = JsonNode.Parse(request.Content.ReadAsStringAsync().Result);
-                    if (responseAboutPL["online"].Equals("false")) await client.SetGameAsync($"выключенный PL", "https://yaflay.ru/", ActivityType.Watching);
+                    bool result;
+                    if (bool.TryParse(responseAboutPL["online"].ToString(), out result) || result) await client.SetGameAsync($"выключенный PL", "https://yaflay.ru/", ActivityType.Watching);
                     else await client.SetGameAsync($"онлайн на PL: {responseAboutPL["players"]["online"]}", "https://yaflay.ru/", ActivityType.Watching);
                 }
                 finally

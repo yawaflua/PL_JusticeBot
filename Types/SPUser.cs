@@ -21,7 +21,7 @@
         public string id { get; set; }
     }
 
-    public class Root
+    public class SPUser
     {
         public string id { get; set; }
         public bool isBanned { get; set; }
