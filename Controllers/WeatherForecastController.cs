@@ -6,11 +6,11 @@ using System.Text.Json.Nodes;
 namespace DiscordApp.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("[controller]/")]
     public class redirects : ControllerBase
     {
 
-        [HttpGet("/redirects/{uri}")]
+        [HttpGet("redirects/{uri}")]
         public IActionResult Get(string uri)
         {
             var data = Startup.appDbContext.Redirects.First(k => k.Id == uri);
