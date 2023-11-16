@@ -23,19 +23,25 @@ namespace DiscordApp.Controllers
                 return Redirect(data.url);
             }else if (data.RedirectType == Types.RedirectType.Redirected)
             {
-                var guild = Startup.discordSocketClient.GetGuild(1107742957458685985);
-                var channel = guild.GetChannel(channelid) as ITextChannel;
-                var message = channel.GetMessagesAsync().LastOrDefaultAsync().Result.FirstOrDefault() as IUserMessage;
-                await message.ModifyAsync(func =>
+                try
                 {
-                    func.Content = "Successfully paid!";
-                    func.Components = new ComponentBuilder()
-                        .WithButton("Create request", "addBaseOnMapModalSender")
-                        .Build();
-                });
+                    var guild = Startup.discordSocketClient.GetGuild(1107742957458685985);
+                    var channel = guild.GetChannel(channelid) as ITextChannel;
+                    var message = channel.GetMessagesAsync().LastOrDefaultAsync().Result.FirstOrDefault() as IUserMessage;
+                    await message.ModifyAsync(func =>
+                    {
+                        func.Content = "Successfully paid!";
+                        func.Components = new ComponentBuilder()
+                            .WithButton("Create request", "addBaseOnMapModalSender")
+                            .Build();
+                    });
 
-                return Redirect(message.GetJumpUrl());
-            }
+                    return Redirect(message.GetJumpUrl());
+                }catch(Exception ex)
+                {
+                    return Ok($"500: Error in discord client. Text error: {ex.Message}");
+                }
+            }   
             else
             {
                 return BadRequest();
