@@ -16,11 +16,11 @@ namespace DiscordApp.Justice.Modals
         public string description { get; set; }
 
         [InputLabel("Х координата")]
-        [ModalTextInput("xCoordinate", TextInputStyle.Short, placeholder: "70", maxLength: 4)]
+        [ModalTextInput("xCoordinate", TextInputStyle.Short, placeholder: "70", maxLength: 10)]
         public int xCoordinate { get; set; }
 
         [InputLabel("Y координата")]
-        [ModalTextInput("yCoordinate", TextInputStyle.Short, placeholder: "90", maxLength: 4)]
+        [ModalTextInput("yCoordinate", TextInputStyle.Short, placeholder: "90", maxLength: 10)]
         public int yCoordinate { get; set; }
 
     }
