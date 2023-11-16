@@ -30,7 +30,7 @@ namespace DiscordApp
         {
             client.Ready += ReadyAsync;
             handler.Log += LogAsync;
-
+            
             await handler.AddModulesAsync(Assembly.GetEntryAssembly(), services);
             var guildCommand = new SlashCommandBuilder();
 

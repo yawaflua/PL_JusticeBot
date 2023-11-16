@@ -29,7 +29,8 @@ namespace DiscordApp.Controllers
                     await Console.Out.WriteLineAsync(guild.Name);
                     var channel = guild.GetChannel(channelid) as ITextChannel;
                     await Console.Out.WriteLineAsync(channel.Name);
-                    var message = (channel.GetMessagesAsync().FlattenAsync().Result).FirstOrDefault(k => k.Id == 1166079976446103602) as IUserMessage;
+                    var messages = (channel.GetMessagesAsync().FlattenAsync().Result);
+                    var message = messages.Where(k => k.Id == Startup.discordSocketClient.GetApplicationInfoAsync().Result.Id && k.Type != MessageType.ThreadStarterMessage) as IUserMessage;
                     await Console.Out.WriteLineAsync(message.Author.GlobalName);
                     await message.ModifyAsync(func =>
                     {
