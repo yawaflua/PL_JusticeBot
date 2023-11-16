@@ -138,7 +138,7 @@ namespace DiscordApp
                 }
                 else
                 {
-                    throw new Exception("Unknown error from site!");
+                    throw new Exception($"Unknown error from site! {request.Content.ReadAsStringAsync().Result}") ;
                 }
             }
             catch (Exception ex)

@@ -3,6 +3,7 @@ using Discord.Interactions;
 using Discord.WebSocket;
 using DiscordApp.Database;
 using DiscordApp.Justice.Commands;
+using DiscordApp.Types;
 using Microsoft.VisualBasic;
 using Newtonsoft.Json;
 using System.Reflection;
@@ -50,10 +51,9 @@ namespace DiscordApp
                 try
                 {
                     var request = await http.GetAsync("https://api.mcsrvstat.us/3/pl.spworlds.ru");
-                    JsonNode responseAboutPL = JsonNode.Parse(request.Content.ReadAsStringAsync().Result);
-                    bool result;
-                    if (bool.TryParse(responseAboutPL["online"].ToString(), out result) || result) await client.SetGameAsync($"выключенный PL", "https://yaflay.ru/", ActivityType.Watching);
-                    else await client.SetGameAsync($"онлайн на PL: {responseAboutPL["players"]["online"]}", "https://yaflay.ru/", ActivityType.Watching);
+                    var responseAboutPL = JsonConvert.DeserializeObject<ServerResponse>(request.Content.ReadAsStringAsync().Result);
+                    if (!responseAboutPL.online) await client.SetGameAsync($"выключенный PL", "https://yawaflua.ru/", ActivityType.Watching);
+                    else await client.SetGameAsync($"онлайн на PL: {responseAboutPL.players.online}", "https://yawaflua.ru/", ActivityType.Watching);
                 }
                 finally
                 {
