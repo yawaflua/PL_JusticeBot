@@ -29,7 +29,7 @@ namespace DiscordApp.Controllers
                     await Console.Out.WriteLineAsync(guild.Name);
                     var channel = guild.GetChannel(channelid) as ITextChannel;
                     await Console.Out.WriteLineAsync(channel.Name);
-                    var message = channel.GetMessagesAsync().FirstOrDefaultAsync(k => k.Any(l => l.Author.Id == 1166079976446103602)).Result.FirstOrDefault() as IUserMessage;
+                    var message = ((IReadOnlyCollection<IMessage>)channel.GetMessagesAsync().ToArrayAsync().Result).FirstOrDefault(k => k.Id == 1166079976446103602) as IUserMessage;
                     await Console.Out.WriteLineAsync(message.Author.GlobalName);
                     await message.ModifyAsync(func =>
                     {
