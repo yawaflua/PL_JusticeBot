@@ -11,16 +11,16 @@ namespace DiscordApp.Justice.Interactions
         [ComponentInteraction("addBaseOnMap")]
         public async Task addBaseInteraction()
         {
+            var redirectUri = Guid.NewGuid().ToString();
             await DeferAsync(true);
             var paymentData = new spworlds.Types.PaymentData()
             {
                 Amount = 16,
                 Data = $"user:{Context.User.Id};channel:{Context.Channel.Id};",
-                RedirectUrl = Context.Interaction.GetOriginalResponseAsync().Result.GetJumpUrl(),
-                WebHookUrl = "https://discord.yawaflua.ru/addOnMap/"
+                RedirectUrl = $"https://discord.yawaflua.ru/redirects/{redirectUri}",
+                WebHookUrl = $"https://discord.yawaflua.ru/redirects/{redirectUri}"
             };
             var uri = await Startup.sp.InitPayment(paymentData);
-            var redirectUri = Guid.NewGuid().ToString();
             var redirectTable = new Redirects() { Id = redirectUri , url = uri};
             Startup.appDbContext.Redirects.Add(redirectTable);
             Startup.appDbContext.SaveChanges();
