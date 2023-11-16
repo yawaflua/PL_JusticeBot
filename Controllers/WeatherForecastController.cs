@@ -11,16 +11,23 @@ namespace DiscordApp.Controllers
     {
 
         [HttpGet("/redirects/{uri}")]
-        public IActionResult Get(string uri)
+        public IActionResult Get(string uri, [FromBody] string? bodyContent)
         {
             var data = Startup.appDbContext.Redirects.First(k => k.Id == uri);
-            Startup.appDbContext.Redirects.Remove(data);
-            Startup.appDbContext.SaveChanges();
-            return Redirect(data.url);
+            if (data.RedirectType == Types.RedirectType.None)
+            {
+                data.RedirectType = Types.RedirectType.Redirected;
+                Startup.appDbContext.Redirects.Update(data);
+                Startup.appDbContext.SaveChanges();
+                return Redirect(data.url);
+            }
+            else
+            {
+                return BadRequest();
+            }
         }
-
-        [HttpPost("/addOnMap")]
-        public ActionResult Create(string bodyContent)
+        [HttpPost("/redirects/{uri}")]
+        public IActionResult Post(string uri, [FromBody] string bodyContent) 
         {
             JsonNode jsonBodyContent = JsonNode.Parse(bodyContent);
             string[] paymentData = jsonBodyContent["data"].ToString().Split(";");
@@ -35,7 +42,7 @@ namespace DiscordApp.Controllers
                     .Build();
             }).RunSynchronously();
 
-            return Ok();
+            return Redirect(message.GetJumpUrl());
         }
 
     }

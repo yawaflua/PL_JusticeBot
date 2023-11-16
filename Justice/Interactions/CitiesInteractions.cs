@@ -24,7 +24,7 @@ namespace DiscordApp.Justice.Interactions
             var redirectTable = new Redirects() { Id = redirectUri , url = uri};
             Startup.appDbContext.Redirects.Add(redirectTable);
             Startup.appDbContext.SaveChanges();
-            await FollowupAsync("Нажмите на кнопку ниже для оплаты", components: new ComponentBuilder().WithButton("Оплатить", url: $"https://discord.yawaflua.ru/redirects/{redirectUri}", style: ButtonStyle.Link).Build());//, ephemeral: true);
+            await FollowupAsync("Нажмите на кнопку ниже для оплаты", components: new ComponentBuilder().WithButton("Оплатить", url: $"https://discord.yawaflua.ru/redirects/{redirectUri}", style: ButtonStyle.Link).Build(), ephemeral: true);
 
         }
 
