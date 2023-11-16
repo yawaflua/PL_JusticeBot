@@ -28,9 +28,9 @@ namespace DiscordApp.Controllers
                 var message = channel.GetMessagesAsync().LastOrDefaultAsync().Result.FirstOrDefault() as IUserMessage;
                 await message.ModifyAsync(func =>
                 {
-                    func.Content = "Успешно оплачено!";
+                    func.Content = "Successfully paid!";
                     func.Components = new ComponentBuilder()
-                        .WithButton("Создание заявки", "addBaseOnMapModalSender")
+                        .WithButton("Create request", "addBaseOnMapModalSender")
                         .Build();
                 });
 
