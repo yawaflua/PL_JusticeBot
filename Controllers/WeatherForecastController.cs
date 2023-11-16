@@ -26,8 +26,11 @@ namespace DiscordApp.Controllers
                 try
                 {
                     var guild = Startup.discordSocketClient.GetGuild(1107742957458685985);
+                    await Console.Out.WriteLineAsync(guild.Name);
                     var channel = guild.GetChannel(channelid) as ITextChannel;
+                    await Console.Out.WriteLineAsync(channel.Name);
                     var message = channel.GetMessagesAsync().LastOrDefaultAsync().Result.FirstOrDefault() as IUserMessage;
+                    await Console.Out.WriteLineAsync(message.Author.GlobalName);
                     await message.ModifyAsync(func =>
                     {
                         func.Content = "Successfully paid!";
