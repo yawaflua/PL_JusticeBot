@@ -30,7 +30,7 @@ namespace DiscordApp.Controllers
                     var channel = guild.GetChannel(channelid) as ITextChannel;
                     await Console.Out.WriteLineAsync(channel.Name);
                     var messages = (channel.GetMessagesAsync().FlattenAsync().Result);
-                    var message = messages.Where(k => k.Id == Startup.discordSocketClient.GetApplicationInfoAsync().Result.Id && k.Type != MessageType.ThreadStarterMessage) as IUserMessage;
+                    var message = messages.Where(k => k.Author.Id == Startup.discordSocketClient.GetApplicationInfoAsync().Result.Id && k.Type != MessageType.ThreadStarterMessage) as IUserMessage;
                     await Console.Out.WriteLineAsync(message.Author.GlobalName);
                     await message.ModifyAsync(func =>
                     {
