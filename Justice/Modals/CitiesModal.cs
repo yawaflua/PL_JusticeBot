@@ -19,9 +19,9 @@ namespace DiscordApp.Justice.Modals
         [ModalTextInput("xCoordinate", TextInputStyle.Short, placeholder: "70", maxLength: 10)]
         public int xCoordinate { get; set; }
 
-        [InputLabel("Y координата")]
+        [InputLabel("Z координата")]
         [ModalTextInput("yCoordinate", TextInputStyle.Short, placeholder: "90", maxLength: 10)]
-        public int yCoordinate { get; set; }
+        public int zCoordinate { get; set; }
 
     }
 }

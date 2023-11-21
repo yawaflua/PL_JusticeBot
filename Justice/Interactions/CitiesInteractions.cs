@@ -20,7 +20,7 @@ namespace DiscordApp.Justice.Interactions
             var paymentData = new spworlds.Types.PaymentData()
             {
                 Amount = 16,
-                Data = $"user:{Context.User.Id};channel:{thread.Id};",
+                Data = $"user:{Context.User.Id};channel:{thread.Id};uri:{redirectUri};type:addSityOnMap;",
                 RedirectUrl = $"https://discord.yawaflua.ru/redirects/{redirectUri}&channelid={thread.Id}",
                 WebHookUrl = $"https://discord.yawaflua.ru/redirects/{redirectUri}"
             };
@@ -28,7 +28,7 @@ namespace DiscordApp.Justice.Interactions
             var redirectTable = new Redirects() { Id = redirectUri , url = uri};
             Startup.appDbContext.Redirects.Add(redirectTable);
             Startup.appDbContext.SaveChanges();
-            await thread.SendMessageAsync("Нажмите на кнопку ниже для оплаты", components: new ComponentBuilder().WithButton("Оплатить", url: $"https://discord.yawaflua.ru/redirects/{redirectUri}", style: ButtonStyle.Link).Build());
+            await thread.SendMessageAsync($"Нажмите на кнопку ниже для оплаты \n {Context.User.Mention} <@945317832290336798>", components: new ComponentBuilder().WithButton("Оплатить", url: $"https://discord.yawaflua.ru/redirects/{redirectUri}", style: ButtonStyle.Link).Build());
 
         }
 
@@ -53,7 +53,7 @@ namespace DiscordApp.Justice.Interactions
                     .WithValue(modal.xCoordinate),
                 new EmbedFieldBuilder()
                     .WithName("Y Координата")
-                    .WithValue(modal.yCoordinate),
+                    .WithValue(modal.zCoordinate),
             };
             var footer = new EmbedFooterBuilder()
                 .WithText(Context.User.Id.ToString())
@@ -69,9 +69,10 @@ namespace DiscordApp.Justice.Interactions
                 .WithFields(fields)
                 .Build();
             var channel = Context.Guild.GetTextChannel(1174722397820174439);
-            await channel.SendMessageAsync("@ #here", embed: embed, components: components);
+            await channel.SendMessageAsync("<@945317832290336798>", embed: embed, components: components);
             await FollowupAsync("Заявка подана и передана ответственным лицам. Ожидайте!", ephemeral: true);
             var threadChannel = Context.Channel as IThreadChannel;
+            await threadChannel.RemoveUserAsync((IGuildUser)Context.User);
             await threadChannel.ModifyAsync(k => k.Archived = true);
         }
 
