@@ -52,7 +52,7 @@ namespace DiscordApp.Justice.Interactions
                     .WithName("X Координата")
                     .WithValue(modal.xCoordinate),
                 new EmbedFieldBuilder()
-                    .WithName("Y Координата")
+                    .WithName("Z Координата")
                     .WithValue(modal.zCoordinate),
             };
             var footer = new EmbedFooterBuilder()
