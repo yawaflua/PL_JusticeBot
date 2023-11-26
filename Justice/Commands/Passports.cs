@@ -19,6 +19,7 @@ namespace DiscordApp.Justice.Commands
             var Components = new ComponentBuilder()
                 .WithButton(new ButtonBuilder() { CustomId = "newPassport", Label = "Новый паспорт", Style = ButtonStyle.Primary })
                 .WithButton(new ButtonBuilder() { CustomId = "reworkPassport", Label = "Замена паспорта", Style = ButtonStyle.Primary })
+                .WithButton(new ButtonBuilder() { CustomId = "BuyIdPassportButton", Label = "Покупка номера", Style = ButtonStyle.Primary })
                 .Build();
             await Context.Channel.SendMessageAsync(embed: Embed, components: Components);
             await FollowupAsync("OK!");//, ephemeral: true);

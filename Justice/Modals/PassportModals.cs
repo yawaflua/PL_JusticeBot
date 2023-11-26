@@ -25,6 +25,46 @@ namespace DiscordApp.Justice.Modals
 
     }
 
+    public class INewIdPassportModal : IModal
+    {
+        public string Title => "Обновление номера";
+
+        [InputLabel("Ник игрока")]
+        [ModalTextInput("nickname", TextInputStyle.Short, placeholder: "YaFlay", maxLength: 90)]
+        public string NickName { get; set; }
+
+        [InputLabel("Благотворитель")]
+        [ModalTextInput("Supporter", TextInputStyle.Short, placeholder: "1", maxLength: 5)]
+        public int Supporter { get; set; }
+
+        [InputLabel("РП Имя")]
+        [ModalTextInput("rolePlayName", TextInputStyle.Short, placeholder: "Олег Бебров", maxLength: 200)]
+        public string RPName { get; set; }
+
+        [InputLabel("Пол")]
+        [ModalTextInput("gender", TextInputStyle.Short, maxLength: 200)]
+        public string Gender { get; set; }
+
+        [InputLabel("Новый номер паспорта")]
+        [ModalTextInput("id", TextInputStyle.Short, maxLength: 5)]
+        public string newId { get; set; }
+
+    }
+
+    public class IReNewPassportWithIdModal : IModal
+    {
+        public string Title => "Обновление номера";
+
+
+        [InputLabel("Старый номер паспорта")]
+        [ModalTextInput("oldid", TextInputStyle.Short, maxLength: 5)]
+        public string Id { get; set; }
+
+        [InputLabel("Новый номер паспорта")]
+        [ModalTextInput("id", TextInputStyle.Short, maxLength: 5)]
+        public string newId { get; set; }
+    }
+
     public class IReWorkPassportModal : IModal
     {
         public string Title => "Создание паспорта";

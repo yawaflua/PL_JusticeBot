@@ -9,6 +9,7 @@
         PetPassport = 2,
         Marry = 4,
         BirthDocument = 4,
-        Patent = 2
+        Patent = 2,
+        buyId = 64
     }
 }
