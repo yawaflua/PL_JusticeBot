@@ -42,9 +42,9 @@ namespace DiscordApp
                 .AddEnvironmentVariables(prefix: "m.")
                 .AddJsonFile("appsettings.json", optional: true)
                 .Build();
-            string CardId = "28fd1597-05a9-4ee0-8845-16ca37135081";
-            string CardToken = "m+ziDmuTdFElD0vcKYnO3DS1h/9HuRGk";
-            string token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijk0NTMxNzgzMjI5MDMzNjc5OCIsInRva2VuVmVyc2lvbiI6MCwiaXAiOiIxODUuMTA0LjExMi4xODAiLCJpYXQiOjE2OTkxOTA5MzMsImV4cCI6MTcwMTc4MjkzM30.Z9ykVYIIsN0bF0BlNV6sgwdiRu-GNx-olmKRxl6OJHk";
+            string CardId = "";
+            string CardToken = "";
+            string token = "";
             var cookieContainer = new CookieContainer();
             var handler = new HttpClientHandler() { CookieContainer = cookieContainer };
             client = new(handler);
@@ -56,54 +56,7 @@ namespace DiscordApp
 
         public void spwLogin()
         {
-            string ok = @"{
-    ""id"": ""945317832290336798"",
-    ""isAdmin"": false,
-    ""minecraftUUID"": ""775f00d30da34275967d58cb50838b9f"",
-    ""accounts"": [
-        {
-                ""id"": ""095ee127-578b-479e-90af-21b679546e09"",
-            ""serverId"": ""spb"",
-            ""roles"": [],
-            ""isBanned"": false,
-            ""banReason"": null,
-            ""server"": {
-                    ""id"": ""spb"",
-                ""name"": ""СПб"",
-                ""icon"": 1,
-                ""hasSite"": true,
-                ""economy"": {
-                        ""campaignPrice"": 32,
-                    ""pinPrice"": 0,
-                    ""adPrice"": 32
-                }
-                }
-            },
-        {
-                ""id"": ""96a89c09-63a1-44e9-9e10-abbf9f78483c"",
-            ""serverId"": ""pl"",
-            ""roles"": [
-                ""mapmaker""
-            ],
-            ""isBanned"": false,
-            ""banReason"": null,
-            ""server"": {
-                    ""id"": ""pl"",
-                ""name"": ""PoopLand"",
-                ""icon"": 4,
-                ""hasSite"": true,
-                ""economy"": {
-                        ""campaignPrice"": 32,
-                    ""pinPrice"": 0,
-                    ""adPrice"": 32
-                }
-                }
-            }
-    ],
-    ""bedrockUsername"": ""YaFlay"",
-    ""username"": ""YaFlay"",
-    ""hasTOTP"": false
-}";
+            string ok = @"{}";
             var content = new StringContent(ok);
             var responseMessage = client.PostAsync("auth/refresh_token", content).Result;
             Console.WriteLine(responseMessage.Content.ReadAsStringAsync().Result.ToString());
@@ -181,7 +134,7 @@ namespace DiscordApp
                 .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()))
                 .AddSingleton<JusticeHandler>()
                 .AddSingleton(sp)
-                .AddDbContext<AppDbContext>(c => c.UseNpgsql(@"Host=185.104.112.180;Username=yaflay;Password=hQgtruasSS;Database=poopland"))
+                .AddDbContext<AppDbContext>(c => c.UseNpgsql(@""))
                 ;
 
 
